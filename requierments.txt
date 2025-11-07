@@ -1,8 +1,0 @@
-fastapi
-uvicorn[standard]
-SQLAlchemy==1.4
-pymysql
-alembic
-passlib[bcrypt]
-python-jose[cryptography]
-pydantic

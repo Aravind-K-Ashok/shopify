@@ -46,3 +46,9 @@ def home():
             "/products/subcategories",
         ],
     }
+
+
+@app.get("/healthz")
+def health_check():
+    """Health check endpoint for Render and load balancers."""
+    return {"status": "ok"}

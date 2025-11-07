@@ -72,21 +72,54 @@ The API documentation is automatically generated and can be accessed at:
 
 ## Configuration
 
-Database configuration can be found in `app/database/database.py`. Update the following values as needed:
+Database configuration is now read from environment variables. You can provide either a single `DATABASE_URL` (recommended) or the individual `DB_*` variables.
 
-```python
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "123456",
-    "database": "ecomdb"
-}
+Preferred: set `DATABASE_URL` (example, do NOT commit secrets):
+
+```text
+# Example (remove credentials and fill in your password before use):
+# DATABASE_URL=mysql://avnadmin:REPLACE_WITH_PASSWORD@mysql-29c6b70f-aravindkashok10-db91.i.aivencloud.com:18523/defaultdb?ssl-mode=REQUIRED
+DATABASE_URL=
 ```
+
+Or set individual variables (used when `DATABASE_URL` is not present):
+
+```text
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=yourpassword
+DB_NAME=ecomdb
+```
+
+Optional: If your provider requires TLS verification, upload the provider's CA bundle to the host/container and set:
+
+```text
+DB_SSL_CA=/path/to/ca-bundle.pem
+```
+
+A `.env.example` file has been added to the repository to show the variables and expected format. For local development copy it to `.env` and fill values (do NOT commit `.env`).
+
+## Importing the provided SQL backup
+
+To import the SQL backup located at `app/database_backup/data_*.sql` into a remote MySQL (Aiven) instance from your local machine, run:
+
+```powershell
+mysql -h <HOST> -P <PORT> -u <USER> -p --ssl-mode=REQUIRED <DB_NAME> < .\app\database_backup\data_20251107_212518.sql
+```
+
+Example (replace with your actual values):
+
+```powershell
+mysql -h mysql-29c6b70f-aravindkashok10-db91.i.aivencloud.com -P 18523 -u avnadmin -p --ssl-mode=REQUIRED defaultdb < .\app\database_backup\data_20251107_212518.sql
+```
+
+The command will prompt for the password. Make sure the `mysql` client is installed locally. If you prefer, you can import via the provider's console/GUI.
 
 ## Security Notes
 
 Before deploying to production:
-1. Move database credentials to environment variables
+1. Move database credentials to environment variables (done)
 2. Enable CORS only for trusted domains
 3. Add rate limiting
 4. Enable HTTPS

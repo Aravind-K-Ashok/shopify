@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment — Shopify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .payment-form {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 20px;
+    }
+
+    .order-summary {
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .summary-title {
+      color: var(--accent);
+      margin: 0 0 15px;
+      font-size: 1.2rem;
+    }
+
+    .summary-items {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+    }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      color: var(--text-light);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-light);
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .pay-btn {
+      background: var(--accent);
+      color: black;
+      border: none;
+      width: 100%;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .pay-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px var(--accent);
+    }
+
+    .pay-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .payment-methods {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .payment-method {
+      flex: 1;
+      text-align: center;
+      padding: 15px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .payment-method:hover,
+    .payment-method.active {
+      background: var(--accent);
+      color: black;
+    }
+
+    .payment-method img {
+      height: 30px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .payment-methods {
+        flex-direction: column;
+      }
+    }
+
+    .loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- shared NAVBAR -->
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <div class="container">
+    <div class="payment-form">
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h3 class="summary-title">Order Summary</h3>
+        <div id="summary-items" class="summary-items">
+          <!-- Items will be listed here -->
+        </div>
+        <div class="total">
+          <span>Total Amount</span>
+          <span id="total-amount"></span>
+        </div>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="payment-methods">
+        <div class="payment-method active" data-method="card">
+          <img src="https://cdn-icons-png.flaticon.com/128/147/147258.png" alt="Card">
+          <div>Credit/Debit Card</div>
+        </div>
+        <div class="payment-method" data-method="upi">
+          <img src="https://cdn-icons-png.flaticon.com/128/196/196566.png" alt="UPI">
+          <div>UPI</div>
+        </div>
+        <div class="payment-method" data-method="cod">
+          <img src="https://cdn-icons-png.flaticon.com/128/2331/2331852.png" alt="COD">
+          <div>Cash on Delivery</div>
+        </div>
+      </div>
+
+      <!-- Payment Forms -->
+      <form id="card-form" class="payment-form-content">
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry Date</label>
+            <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="password" id="card-cvv" placeholder="123" maxlength="3">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Name on Card</label>
+          <input type="text" id="card-name" placeholder="John Doe">
+        </div>
+      </form>
+
+      <form id="upi-form" class="payment-form-content" style="display:none;">
+        <div class="form-group">
+          <label>UPI ID</label>
+          <input type="text" id="upi-id" placeholder="username@upi">
+        </div>
+      </form>
+
+      <form id="cod-form" class="payment-form-content" style="display:none;">
+        <div class="form-group">
+          <label>Delivery Address</label>
+          <textarea id="delivery-address" rows="3" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:white;padding:12px;"></textarea>
+        </div>
+      </form>
+
+      <button id="pay-btn" class="pay-btn">Proceed to Pay</button>
+    </div>
+  </div>
+
+  <script>
+    // Get cart and total from localStorage/URL
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const customerid = localStorage.getItem('customerID');
+    if (!customerid) {
+      location.href = './login.html';
+    }
+
+    // Format currency
+    const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+    // Calculate and display order summary
+    function displaySummary() {
+      const items = document.getElementById('summary-items');
+      const total = document.getElementById('total-amount');
+      let totalAmount = 0;
+
+      items.innerHTML = cart.map(item => {
+        const itemTotal = (Number(item.price) || 0) * (Number(item.qty) || 1);
+        totalAmount += itemTotal;
+        return `
+          <div class="summary-item">
+            <span>${item.name} × ${item.qty}</span>
+            <span>${inrFmt.format(itemTotal)}</span>
+          </div>
+        `;
+      }).join('');
+
+      total.textContent = inrFmt.format(totalAmount);
+    }
+
+    // Payment method switching
+    const methods = document.querySelectorAll('.payment-method');
+    const forms = {
+      card: document.getElementById('card-form'),
+      upi: document.getElementById('upi-form'),
+      cod: document.getElementById('cod-form')
+    };
+
+    let currentMethod = 'card';
+
+    methods.forEach(method => {
+      method.addEventListener('click', () => {
+        // Update active state
+        methods.forEach(m => m.classList.remove('active'));
+        method.classList.add('active');
+
+        // Show relevant form
+        const methodId = method.dataset.method;
+        Object.values(forms).forEach(form => form.style.display = 'none');
+        if (forms[methodId]) {
+          forms[methodId].style.display = 'block';
+        }
+        currentMethod = methodId;
+      });
+    });
+
+    // Basic form validation and formatting
+    const cardNumber = document.getElementById('card-number');
+    cardNumber?.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      value = value.replace(/(\d{4})/g, '$1 ').trim();
+      e.target.value = value;
+    });
+
+    const cardExpiry = document.getElementById('card-expiry');
+    cardExpiry?.addEventListener('input', (e) => {
+      let value = e.target.value.replace(/\D/g, '');
+      if (value.length >= 2) {
+        value = value.slice(0,2) + '/' + value.slice(2);
+      }
+      e.target.value = value;
+    });
+
+    // Payment processing
+    async function processPayment() {
+      const payBtn = document.getElementById('pay-btn');
+      payBtn.disabled = true;
+      
+      try {
+        const API = 'http://127.0.0.1:8000/orders';
+        const loading = document.createElement('div');
+        loading.className = 'loading';
+        loading.textContent = 'Processing payment...';
+        document.body.appendChild(loading);
+
+        const results = [];
+        
+        // Process each cart item as an order
+        for (const item of cart) {
+          if (!item.productid) {
+            results.push({ success: false, message: `Missing product id for ${item.name}` });
+            continue;
+          }
+
+          try {
+            // Calculate amount first
+            const amount = (Number(item.price) || 0) * (Number(item.qty) || 1);
+            if (!amount || isNaN(amount) || amount <= 0) {
+              results.push({
+                success: false,
+                message: `Invalid price for ${item.name || 'item'}`
+              });
+              continue;
+            }
+
+            // Place order
+            const orderUrl = `${API}/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(item.productid)}&qty=${encodeURIComponent(item.qty)}`;
+            const orderRes = await fetch(orderUrl, { method: 'POST' });
+            const orderData = await orderRes.json();
+            
+            if (!orderRes.ok || orderData.error) {
+              results.push({ 
+                success: false, 
+                message: orderData.detail || orderData.error || 'Order failed' 
+              });
+              continue;
+            }
+
+            // Extract orderid from success message
+            const orderMatch = orderData.message?.match(/Order (\d+) placed/);
+            const orderid = orderMatch ? orderMatch[1] : null;
+
+            if (!orderid) {
+              results.push({
+                success: false,
+                message: 'Order created but no order ID returned'
+              });
+              continue;
+            }
+
+            // Verify transaction exists and update if needed. Backend now completes payment on order placement,
+            // but if transaction is missing for any reason, create it as 'Completed' (instant payment completed).
+            const transCheckRes = await fetch(`${API}/${orderid}/transaction`);
+            if (!transCheckRes.ok) {
+              // Create new transaction if one doesn't exist (mark as Completed)
+              const transUrl = `${API}/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent('Completed')}`;
+              const transRes = await fetch(transUrl, { method: 'POST' });
+              const transData = await transRes.json();
+              
+              if (!transRes.ok || transData.error) {
+                results.push({ 
+                  success: false, 
+                  message: `Order placed but payment failed: ${transData.error || 'Unknown error'}` 
+                });
+                continue;
+              }
+            }
+
+            results.push({ success: true, message: orderData.message });
+
+          } catch (e) {
+            results.push({ success: false, message: e.message });
+          }
+        }
+
+        loading.remove();
+
+        const failed = results.filter(r => !r.success);
+        if (failed.length === 0) {
+          alert('✅ Payment successful! Orders have been placed.');
+          localStorage.removeItem('cart');
+          location.href = './transactions.html';  // Show order history
+        } else {
+          alert(`Some orders failed:\n${failed.map(f => f.message).join('\n')}`);
+        }
+
+      } catch (e) {
+        alert('Payment processing failed: ' + e.message);
+      } finally {
+        payBtn.disabled = false;
+      }
+    }
+
+    // Initialize
+    displaySummary();
+    document.getElementById('pay-btn').addEventListener('click', processPayment);
+  </script>
+
+</body>
+</html>

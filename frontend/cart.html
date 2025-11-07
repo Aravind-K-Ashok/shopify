@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Cart | Shopify</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    main {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      box-shadow: var(--shadow);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      color: var(--accent);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-item img {
+      height: 70px;
+      width: 70px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(0,191,166,0.2), rgba(255,255,255,0.05));
+    }
+
+    .cart-info {
+      flex: 1;
+      margin-left: 1.2rem;
+    }
+
+    .cart-info h3 {
+      color: var(--text-light);
+      font-weight: 600;
+    }
+
+    .cart-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .cart-item .price {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .remove-btn:hover {
+      color: var(--accent);
+      transform: scale(1.1);
+    }
+
+    .total {
+      text-align: right;
+      font-size: 1.3rem;
+      margin-top: 1.5rem;
+      color: var(--text-light);
+    }
+
+    .checkout-btn {
+      display: block;
+      margin: 2rem auto 0;
+      padding: 0.9rem 2.2rem;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .checkout-btn:hover {
+      box-shadow: 0 0 20px var(--accent);
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <!-- shared NAVBAR -->
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <main>
+    <h2>Your Shopping Cart</h2>
+
+    <div id="cart-container"></div>
+
+    <div class="total">Total: ₹<span id="total-amount">0</span></div>
+
+    <button class="checkout-btn" onclick="checkout()">Proceed to Checkout</button>
+  </main>
+
+  <footer>© 2025 Shopify — All rights reserved.</footer>
+
+  <script>
+    // Normalize cart entries coming from different pages / formats.
+    let rawCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // ensure each item has: name, price (number), qty (int), image
+    const normalizeItem = (it) => {
+      if (!it) return null;
+      // case-insensitive getter
+      const get = (obj, keys) => {
+        if (!obj) return undefined;
+        const map = {};
+        Object.keys(obj).forEach(k => map[k.toLowerCase()] = obj[k]);
+        for (const k of keys) {
+          if (map[k.toLowerCase()] !== undefined) return map[k.toLowerCase()];
+        }
+        return undefined;
+      };
+
+      const priceRaw = get(it, ['price','price_inr','price_usd']) ?? 0;
+      const price = Number(priceRaw) || 0;
+      const name = get(it, ['product_name','name','title']) || get(it, ['description']) || 'Untitled';
+      const imageField = get(it, ['images_url','image','image_url','images']) || '';
+      const image = (typeof imageField === 'string' && imageField.split(',')[0].trim()) || imageField || 'https://via.placeholder.com/70';
+      const qty = parseInt(get(it, ['qty','quantity']) ?? get(it, ['count']) ?? 1) || 1;
+      const productid = get(it, ['productid','id','product_id']) || null;
+
+      return { productid, name, price, qty, image };
+    };
+
+    let cart = rawCart.map(normalizeItem).filter(Boolean);
+
+    function renderCart() {
+      const container = document.getElementById("cart-container");
+      const totalElem = document.getElementById("total-amount");
+      container.innerHTML = "";
+      let total = 0;
+
+      if (cart.length === 0) {
+        container.innerHTML = "<p style='text-align:center;color:gray;'>🛒 Your cart is empty</p>";
+        totalElem.textContent = "0.00";
+        return;
+      }
+
+      const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+      cart.forEach((item, index) => {
+        total += (Number(item.price) || 0) * (Number(item.qty) || 1);
+        container.innerHTML += `
+          <div class="cart-item">
+            <img src="${item.image || 'https://via.placeholder.com/70'}" alt="">
+            <div class="cart-info">
+              <h3>${item.name}</h3>
+              <p>Qty: ${item.qty}</p>
+            </div>
+            <div class="price">${inrFmt.format(item.price)}</div>
+            <button class="remove-btn" onclick="removeItem(${index})">✖</button>
+          </div>
+        `;
+      });
+
+      totalElem.textContent = inrFmt.format(total);
+    }
+
+    function persistCart() {
+      // persist the original-ish shape back to localStorage (keep compatibility)
+      const toStore = cart.map(i => ({ productid: i.productid, name: i.name, price: i.price, qty: i.qty, image: i.image }));
+      localStorage.setItem('cart', JSON.stringify(toStore));
+    }
+
+    function removeItem(index) {
+      cart.splice(index, 1);
+      persistCart();
+      renderCart();
+    }
+
+    function checkout() {
+      const customerid = localStorage.getItem('customerID');
+      if (!customerid) {
+        alert('Please log in to place orders.');
+        location.href = 'login.html';
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert('Your cart is empty.');
+        return;
+      }
+
+      // Redirect to payment page
+      location.href = 'payment.html';
+    }
+
+    renderCart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Profile | Shopify</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070707;
+      --panel: #0f0f10;
+      --muted: #25fff4;
+      --accent: #00bfa6;
+      --sub: #9be7ff;
+      --star: #ffd166;
+      --glow: rgba(0, 255, 255, 0.18);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header.navbar {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:18px 28px;
+      background: rgba(15,15,16,0.92);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size:1.4rem; font-weight:600; color:white; }
+    .logo span { color:var(--accent); }
+    nav a { color: var(--muted); margin-left:14px; text-decoration:none; }
+    nav a.active { color: var(--accent); }
+
+    main {
+      flex:1;
+      display:flex;
+      justify-content:center;
+      padding: 36px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 720px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.2);
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    h2 { color: var(--accent); margin: 0 0 8px 0; }
+    .info { color: var(--muted); font-size:14px; line-height:1.6; margin-bottom:18px; }
+    .actions { display:grid; gap:10px; margin-bottom: 12px; }
+    .btn {
+      background: linear-gradient(90deg,var(--accent),var(--sub));
+      color: #000; border: none; padding: 10px 14px; border-radius:12px;
+      font-weight:600; cursor:pointer; width:100%;
+    }
+    .btn.ghost {
+      background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .section { border-top:1px solid rgba(255,255,255,0.06); padding-top:16px; margin-top:16px; }
+
+    footer { text-align:center; padding:12px; color: var(--muted); font-size:13px; }
+
+    .toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: var(--panel); color: white; padding: 10px 16px; border-radius: 14px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.6); z-index: 9999;
+    }
+
+    
+    .modal {
+      position: fixed; inset: 0; display: flex; align-items:center; justify-content:center;
+      background: rgba(0,0,0,0.6); z-index: 2000;
+    }
+    .modal .box {
+      width: 100%; max-width: 420px; background: var(--panel); padding: 18px; border-radius: 12px;
+      box-shadow: 0 6px 24px var(--glow);
+    }
+    .modal h3 { margin: 0 0 10px 0; color: var(--accent); }
+    .modal input, .modal textarea {
+      width:100%; padding:10px; margin:8px 0; border-radius:8px; border:none; background: rgba(255,255,255,0.04); color:white;
+    }
+    .modal .row { display:flex; gap:8px; }
+    .modal .row > * { flex:1; }
+
+    
+    .muted { color: var(--muted); font-size:13px; }
+    .hidden { display:none; }
+  </style>
+</head>
+<body>
+  <!-- shared NAVBAR -->
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <main>
+    <section class="card" role="main" aria-labelledby="profileHeading">
+      <h2 id="profileHeading">Welcome back 👋</h2>
+      <p id="basicInfo" class="info">Loading profile...</p>
+
+      <div class="actions" aria-live="polite" id="actions">
+        <button class="btn" onclick="showModal('phone')">Update Phone Number</button>
+        <button class="btn" onclick="showModal('address')"> Update Address</button>
+        <button class="btn" onclick="showModal('password')"> Change Password</button>
+        <button class="btn" onclick="viewCustomerOrders()">Manage My Orders</button>
+        <button class="btn ghost" onclick="logout()">Logout</button>
+        <button class="btn ghost" onclick="deleteAccount()">Delete Account</button>
+      </div>
+
+      
+      <div id="sellerSection" class="section hidden" aria-hidden="true">
+        <h4 style="color:var(--sub); margin:0 0 8px 0;">Seller Dashboard</h4>
+        <div style="display:grid; gap:8px;">
+          <a href="view_products.html"><button class="btn" onclick="viewSellerProducts()"> View Your Products</button></a>
+          <a href="add_product.html"><button class="btn"> Add New Product</button></a>
+          <button class="btn" onclick="manageSellerOrders()"> Manage Seller Orders</button>
+        </div>
+      </div>
+
+      
+      <div id="becomeSellerSection" class="section hidden" aria-hidden="true">
+        <h4 style="color:var(--sub); margin:0 0 8px 0;">Become a Seller</h4>
+  <p class="muted">Join Shopify marketplace — create product listings, manage orders and more.</p>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button id="registerSellerBtn" class="btn"> Register as Seller</button>
+          <button id="refreshSellerBtn" class="btn ghost"> Retry</button>
+        </div>
+        <p id="sellerMsg" class="muted" style="margin-top:10px;"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2025 Shopify — All rights reserved.</footer>
+
+  
+  <div id="modalRoot"></div>
+
+  <script>
+    
+    const API_BASE = "http://127.0.0.1:8000";
+    const customerID = localStorage.getItem("customerID");
+
+    
+    function safeJson(text) {
+      try { return JSON.parse(text); } catch { return null; }
+    }
+
+    function showToast(text, ms = 2400) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = text;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), ms);
+    }
+
+    function setHidden(el, hidden) {
+      el.classList.toggle("hidden", hidden);
+      el.setAttribute("aria-hidden", hidden ? "true" : "false");
+    }
+
+    
+    if (!customerID) {
+      alert("⚠️ Please log in first.");
+      location.href = "login.html";
+    }
+
+    async function loadProfile() {
+      const infoEl = document.getElementById("basicInfo");
+      const sellerSection = document.getElementById("sellerSection");
+      const becomeSection = document.getElementById("becomeSellerSection");
+      const sellerMsg = document.getElementById("sellerMsg");
+
+      
+      infoEl.textContent = "Loading profile...";
+      sellerMsg.textContent = "";
+
+      try {
+        const custRes = await fetch(`${API_BASE}/customers/${encodeURIComponent(customerID)}`);
+        if (!custRes.ok) {
+          
+          const txt = await custRes.text().catch(()=>"");
+          throw new Error(txt || `Failed to load customer (${custRes.status})`);
+        }
+        const custText = await custRes.text();
+        const custJson = safeJson(custText);
+        const customer = (custJson && (custJson.customer || custJson)) || {};
+
+        
+        const addressParts = [customer.housename, customer.address, customer.district, customer.state].filter(Boolean);
+        const addressLine = addressParts.join(", ") + (customer.pincode ? ` - ${customer.pincode}` : "");
+
+        infoEl.innerHTML = `
+          <strong>Customer ID:</strong> ${customer.customerid ?? customerID}<br>
+          <strong>Name:</strong> ${(customer.fname ?? "") + (customer.lname ? " " + customer.lname : "")}<br>
+          <strong>Phone:</strong> ${customer.phoneno ?? "N/A"}<br>
+          <strong>Address:</strong> ${addressParts.length ? addressLine : "N/A"}<br>
+        `;
+
+  const sRes = await fetch(`${API_BASE}/sellers/customer/${encodeURIComponent(customerID)}`);
+        if (sRes.ok) {
+          setHidden(sellerSection, false);
+          setHidden(becomeSection, true);
+          sellerMsg.textContent = "";
+          console.log("Seller detected (200 OK).");
+        } else {
+          
+          setHidden(sellerSection, true);
+          setHidden(becomeSection, false);
+
+          const body = await sRes.text().catch(()=>"");
+          const parsed = safeJson(body);
+          const msg = parsed?.detail || parsed?.message || body || `Not a seller (${sRes.status})`;
+          sellerMsg.textContent = msg;
+          console.log("Seller check returned non-OK:", sRes.status, msg);
+        }
+      } catch (err) {
+        
+        infoEl.innerHTML = `<span style="color:#ff8080;">❌ ${err.message}</span>`;
+        setHidden(sellerSection, true);
+        setHidden(becomeSection, false);
+        document.getElementById("sellerMsg").textContent = "Couldn't determine seller status — try 'Retry' or contact admin.";
+        console.error("loadProfile error:", err);
+      }
+    }
+
+    function showModal(type) {
+      
+      const root = document.getElementById("modalRoot");
+    
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.innerHTML = `<div class="box" role="dialog" aria-modal="true">
+        <h3></h3>
+        <div class="fields"></div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="btn submit">Submit</button>
+          <button class="btn ghost cancel">Cancel</button>
+        </div>
+      </div>`;
+      root.appendChild(modal);
+
+      const titleEl = modal.querySelector("h3");
+      const fieldsEl = modal.querySelector(".fields");
+      const submitBtn = modal.querySelector(".submit");
+      const cancelBtn = modal.querySelector(".cancel");
+
+      if (type === "phone") {
+        titleEl.textContent = "Update Phone";
+        fieldsEl.innerHTML = `<input id="m_newPhone" placeholder="New phone number">`;
+        submitBtn.onclick = async () => {
+          const newVal = document.getElementById("m_newPhone").value.trim();
+          if (!newVal) return showToast("Enter phone number");
+          submitBtn.disabled = true;
+          try {
+            const res = await fetch(`${API_BASE}/customers/${encodeURIComponent(customerID)}/phone?newphoneno=${encodeURIComponent(newVal)}`, { method: "PUT" });
+            const data = await res.json().catch(()=>null);
+            if (!res.ok) throw new Error(data?.detail || data?.error || JSON.stringify(data) || res.statusText);
+            showToast("Success " + (data.message || "Phone updated"));
+            modal.remove();
+            loadProfile();
+          } catch (err) {
+            showToast("ERROR " + err.message);
+            console.error("update phone:", err);
+            submitBtn.disabled = false;
+          }
+        };
+      } else if (type === "address") {
+        titleEl.textContent = "Update Address";
+        fieldsEl.innerHTML = `
+          <input id="m_addr" placeholder="Address">
+          <div class="row">
+            <input id="m_pin" placeholder="Pincode">
+            <input id="m_dist" placeholder="District">
+          </div>
+          <div class="row">
+            <input id="m_state" placeholder="State">
+            <input id="m_house" placeholder="House Name">
+          </div>
+        `;
+        submitBtn.onclick = async () => {
+          const addr = document.getElementById("m_addr").value.trim();
+          const pin = document.getElementById("m_pin").value.trim();
+          const dist = document.getElementById("m_dist").value.trim();
+          const state = document.getElementById("m_state").value.trim();
+          const house = document.getElementById("m_house").value.trim();
+          submitBtn.disabled = true;
+          try {
+            const q = new URLSearchParams({
+              newaddress: addr,
+              newpincode: pin,
+              newdistrict: dist,
+              newstate: state,
+              newhousename: house
+            });
+            const res = await fetch(`${API_BASE}/customers/${encodeURIComponent(customerID)}/address?${q.toString()}`, { method: "PUT" });
+            const data = await res.json().catch(()=>null);
+            if (!res.ok) throw new Error(data?.detail || data?.error || JSON.stringify(data) || res.statusText);
+            showToast("SUCCESS " + (data.message || "Address updated"));
+            modal.remove();
+            loadProfile();
+          } catch (err) {
+            showToast("ERROR " + err.message);
+            console.error("update address:", err);
+            submitBtn.disabled = false;
+          }
+        };
+      } else if (type === "password") {
+        titleEl.textContent = "Change Password";
+        fieldsEl.innerHTML = `
+          <input id="m_oldpw" type="password" placeholder="Old password">
+          <input id="m_newpw" type="password" placeholder="New password">
+        `;
+        submitBtn.onclick = async () => {
+          const oldpw = document.getElementById("m_oldpw").value;
+          const newpw = document.getElementById("m_newpw").value;
+          if (!oldpw || !newpw) return showToast("Fill both fields");
+          submitBtn.disabled = true;
+          try {
+            const q = new URLSearchParams({ oldpassword: oldpw, newpassword: newpw });
+            const res = await fetch(`${API_BASE}/customers/${encodeURIComponent(customerID)}/password?${q.toString()}`, { method: "PUT" });
+            const data = await res.json().catch(()=>null);
+            if (!res.ok) throw new Error(data?.detail || data?.error || JSON.stringify(data) || res.statusText);
+            showToast("Success " + (data.message || "Password changed"));
+            modal.remove();
+          } catch (err) {
+            showToast("ERROR " + err.message);
+            console.error("change password:", err);
+            submitBtn.disabled = false;
+          }
+        };
+      }
+
+      
+      cancelBtn.onclick = () => modal.remove();
+      modal.addEventListener("click", (ev) => {
+        if (ev.target === modal) modal.remove();
+      });
+    }
+
+    
+    async function registerAsSeller() {
+      const btn = document.getElementById("registerSellerBtn");
+      btn.disabled = true;
+      try {
+        const res = await fetch(`${API_BASE}/sellers/register?customerid=${encodeURIComponent(customerID)}`, { method: "POST" });
+        const text = await res.text().catch(()=>"");
+        const parsed = safeJson(text) || {};
+        if (res.ok || parsed?.detail?.toLowerCase?.()?.includes("already") || parsed?.message?.toLowerCase?.()?.includes("already")) {
+          showToast("Registered as seller (or already a seller).");
+          setHidden(document.getElementById("sellerSection"), false);
+          setHidden(document.getElementById("becomeSellerSection"), true);
+        } else {
+          throw new Error(parsed?.detail || parsed?.message || text || `Error ${res.status}`);
+        }
+      } catch (err) {
+        showToast("ERROR " + err.message);
+        console.error("registerSeller error:", err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    
+    function viewCustomerOrders() {
+      location.href = "transactions.html";
+    }
+    function manageSellerOrders() {
+      location.href = "orders_seller.html";
+    }
+    function viewSellerProducts() {
+      location.href = "seller_products.html";
+    }
+    function logout() {
+      localStorage.removeItem("customerID");
+      showToast("Logged out");
+      setTimeout(() => location.href = "login.html", 700);
+    }
+    function deleteAccount() {
+      if (!confirm("Are you sure you want to delete your account? This action is irreversible.")) return;
+      showToast("Delete account coming soon");
+    }
+
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("registerSellerBtn").addEventListener("click", registerAsSeller);
+      document.getElementById("refreshSellerBtn").addEventListener("click", loadProfile);
+      
+      loadProfile();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Browse Products | Shopify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    :root {
+      --bg: #070707;
+      --panel: #0f0f10;
+      --muted: #25fff4;
+      --accent: #00bfa6;
+      --sub: #9be7ff;
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header.navbar {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:18px 28px;
+      background: rgba(15,15,16,0.92);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-size:1.4rem; font-weight:600; color:white; }
+    .logo span { color:var(--accent); }
+    nav a { color: var(--muted); margin-left:14px; text-decoration:none; }
+    nav a.active { color: var(--accent); }
+
+    main {
+      flex:1;
+      padding: 24px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    select, input[type="search"] {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-family: inherit;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .card h3 { font-size: 1.1rem; margin: 0; color: var(--sub); }
+    .card p { font-size: 0.9rem; color: var(--muted); margin: 4px 0; }
+    .price { color: var(--accent); font-weight: 600; font-size: 1rem; }
+    footer { text-align:center; padding:14px; color: var(--muted); font-size:13px; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+
+<body>
+  <!-- shared NAVBAR -->
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <main>
+    <div class="filters">
+      <select id="categorySelect">
+        <option value="">All Categories</option>
+      </select>
+      <select id="subcategorySelect">
+        <option value="">All Subcategories</option>
+      </select>
+      <input type="search" id="searchBox" placeholder="Search products...">
+    </div>
+
+    <div class="grid" id="productGrid">
+      <!-- Products will load here -->
+    </div>
+  </main>
+
+  <footer>© 2025 Shopify — All rights reserved.</footer>
+
+  <script type="module">
+    const API_BASE = "http://127.0.0.1:8000";
+    const grid = document.getElementById("productGrid");
+    const categorySelect = document.getElementById("categorySelect");
+    const subcategorySelect = document.getElementById("subcategorySelect");
+    const searchBox = document.getElementById("searchBox");
+
+    async function loadCategories() {
+      // Correct
+    const res = await fetch(`${API_BASE}/categories/`);
+    
+
+      const cats = await res.json();
+      if (!Array.isArray(cats)) {
+        console.error("Invalid category response:", cats);
+        return;
+      }
+      cats.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.categoryid;
+        opt.textContent = c.name;
+        categorySelect.appendChild(opt);
+      });
+    }
+
+    async function loadSubcategories(categoryId) {
+      subcategorySelect.innerHTML = `<option value="">All Subcategories</option>`;
+      if (!categoryId) return;
+      const res = await fetch(`${API_BASE}/categories/${categoryId}/subcategories`);
+      const subs = await res.json();
+      if (!Array.isArray(subs)) {
+        console.error("Invalid subcategory response:", subs);
+        return;
+      }
+      subs.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.subcategoryid;
+        opt.textContent = s.name;
+        subcategorySelect.appendChild(opt);
+      });
+    }
+
+    async function loadProducts() {
+      grid.innerHTML = `<p style="color:gray;">Loading products...</p>`;
+      let url = `${API_BASE}/products/`;
+      const subId = subcategorySelect.value;
+      if (subId) url += `?subcategoryid=${subId}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const products = Array.isArray(data) ? data : [];
+      displayProducts(products);
+    }
+
+    function displayProducts(products) {
+      grid.innerHTML = "";
+      if (!products.length) {
+        grid.innerHTML = `<p style="color:gray;">No products found.</p>`;
+        return;
+      }
+
+      products.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        const imageUrl = p.images_url?.startsWith("http")
+          ? p.images_url
+          : `https://pyrimbctohsuqqxqtehq.supabase.co/storage/v1/object/public/product-images/${p.images_url}`;
+
+        // helper: case-insensitive key lookup for multiple possible field names
+        const getField = (obj, names) => {
+          for (const n of names) {
+            if (n in obj) return obj[n];
+            const fk = Object.keys(obj).find(k => k.toLowerCase() === n.toLowerCase());
+            if (fk) return obj[fk];
+          }
+          return undefined;
+        };
+
+        // Robust title handling: try several common column names (case-insensitive)
+        const title = getField(p, ["product_name", "productname", "product name", "name"]) || (p.description ? (p.description.length > 40 ? p.description.slice(0, 40) + "…" : p.description) : "Unnamed Product");
+
+        // Robust price handling: try several price field names and coerce to number
+        const rawPriceVal = getField(p, ["price", "PRICE", "Price"]);
+        const numPrice = rawPriceVal !== undefined && rawPriceVal !== null ? Number(rawPriceVal) : NaN;
+        const priceHtml = Number.isFinite(numPrice) ? `₹${numPrice.toFixed(2)}` : "N/A";
+
+        card.innerHTML = `
+          <img src="${imageUrl}" alt="Product image">
+          <h3>${title}</h3>
+          <p>${p.description || "No description provided."}</p>
+          <p class="price">${priceHtml}</p>
+          <p>Stock: ${p.stock ?? 0}</p>
+          <p>⭐ ${p.rating ?? 0}</p>
+          <p style="font-size:0.8rem;color:#888;">Seller ID: ${p.sellerid}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter / Search Handlers
+    categorySelect.addEventListener("change", async (e) => {
+      await loadSubcategories(e.target.value);
+      await loadProducts();
+    });
+    subcategorySelect.addEventListener("change", loadProducts);
+    searchBox.addEventListener("input", async (e) => {
+      const kw = e.target.value.trim();
+      if (!kw) return loadProducts();
+      const res = await fetch(`${API_BASE}/products/search?keyword=${encodeURIComponent(kw)}`);
+      const data = await res.json();
+      displayProducts(Array.isArray(data) ? data : []);
+    });
+
+    // Initial load
+    await loadCategories();
+    await loadProducts();
+  </script>
+</body>
+</html>

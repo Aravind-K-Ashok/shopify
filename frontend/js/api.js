@@ -1,4 +1,4 @@
-const BASE_URL = "https://your-render-url.onrender.com";
+const BASE_URL = "https://shopify-backend-m9ce.onrender.com";
 
 async function apiRequest(endpoint, method = "GET", params = null) {
   let url = `${BASE_URL}${endpoint}`;

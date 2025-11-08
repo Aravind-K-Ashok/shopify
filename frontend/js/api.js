@@ -1,4 +1,4 @@
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "https://your-render-url.onrender.com";
 
 async function apiRequest(endpoint, method = "GET", params = null) {
   let url = `${BASE_URL}${endpoint}`;

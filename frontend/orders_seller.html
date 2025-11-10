@@ -253,7 +253,7 @@
   </main>
 
   <script>
-    const API_BASE = "http://127.0.0.1:8000";
+    const API_BASE = "https://shopify-backend-m9ce.onrender.com";
     const customerID = localStorage.getItem("customerID");
     let sellerID = null;
     let allOrders = [];
@@ -300,23 +300,23 @@
       if (raw === 'on the way' || raw === 'on-the-way' || raw === 'ontheway') return 'On The Way';
       if (raw === 'delivered') return 'Delivered';
       if (raw === 'cancelled' || raw === 'canceled') return 'Cancelled';
-      // try to match one of the valid statuses by lower-case
+      
       const found = VALID_STATUSES.find(v => v.toLowerCase() === raw);
       return found || 'Pending';
     }
 
-    // Get status badge HTML (safe classname)
+    
     function getStatusBadge(status) {
       const canon = canonicalStatus(status);
       const cls = canon.replace(/\s+/g, '-').toLowerCase();
       return `<span class="status-badge status-${cls}">${canon}</span>`;
     }
 
-    // Initialize revenue chart
+    
     function initRevenueChart(data) {
       const ctx = document.getElementById('revenueChart').getContext('2d');
       
-      // Destroy existing chart if it exists
+      
       if (revenueChart) {
         revenueChart.destroy();
       }
@@ -365,23 +365,23 @@
       });
     }
 
-    // Update statistics
+   
     function updateStats() {
       if (!allOrders.length) return;
 
-      // Calculate basic stats
+      
       const totalOrders = allOrders.length;
       const totalRevenue = allOrders.reduce((sum, order) => sum + order.total_amount, 0);
       const avgOrderValue = totalRevenue / totalOrders;
   const pendingOrders = allOrders.filter(order => canonicalStatus(order.status) === 'Pending').length;
 
-      // Update UI
+     
       document.getElementById('totalOrders').textContent = totalOrders;
       document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
       document.getElementById('avgOrderValue').textContent = formatCurrency(avgOrderValue);
       document.getElementById('pendingOrders').textContent = pendingOrders;
 
-      // Prepare chart data
+      
       const last7Days = [...Array(7)].map((_, i) => {
         const d = new Date();
         d.setDate(d.getDate() - i);
@@ -389,7 +389,7 @@
       }).reverse();
 
       const revenueData = {
-        labels: last7Days.map(date => date.split('-')[2]), // Show only day
+        labels: last7Days.map(date => date.split('-')[2]), 
         values: last7Days.map(date => {
           return allOrders
             .filter(order => {
@@ -405,16 +405,16 @@
       initRevenueChart(revenueData);
     }
 
-    // Update order status
+  
     async function updateOrderStatus(orderId, newStatus) {
       try {
-        // backend expects query param named `new_status` (underscore)
+        
         const res = await fetch(`${API_BASE}/orders/${orderId}/status?new_status=${encodeURIComponent(newStatus)}`, {
           method: 'PUT'
         });
 
         if (!res.ok) {
-          // try to read JSON or text error
+         
           let errorText = 'Failed to update status';
           try {
             const errBody = await res.json();
@@ -426,14 +426,14 @@
         }
 
         showToast(`✅ Order status updated to ${newStatus}`);
-        await loadOrders(); // Refresh orders
+        await loadOrders(); 
       } catch (err) {
         showToast(`❌ ${err.message}`);
         console.error('Update status error:', err);
       }
     }
 
-    // Render orders table
+    
     function renderOrders(orders) {
       const tbody = document.getElementById('ordersTable');
       
@@ -444,7 +444,7 @@
       tbody.innerHTML = orders.map(order => {
         const status = canonicalStatus(order.status);
         const statusClass = status.replace(/\s+/g, '-').toLowerCase();
-        // determine actionable next status
+        
         let actionButtons = '';
         if (status === 'Pending') {
           actionButtons += `<button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Dispatched')">Dispatch</button>`;
@@ -453,7 +453,7 @@
         } else if (status === 'On The Way') {
           actionButtons += `<button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Delivered')">Mark Delivered</button>`;
         }
-        // allow cancel for non-delivered orders
+        
         if (['Pending','Dispatched','On The Way'].includes(status)) {
           actionButtons += ` <button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Cancelled')">Cancel</button>`;
         }
@@ -472,10 +472,10 @@
       }).join('');
     }
 
-    // Load seller orders
+    
     async function loadOrders() {
       try {
-        // First get seller ID if we don't have it
+       
         if (!sellerID) {
           const sRes = await fetch(`${API_BASE}/sellers/customer/${customerID}`);
           if (!sRes.ok) throw new Error('Failed to get seller details');
@@ -483,13 +483,12 @@
           sellerID = seller.sellerid;
         }
 
-  // Now get orders from seller-scoped endpoint (returns enriched totals)
+  
   const res = await fetch(`${API_BASE}/sellers/${sellerID}/orders`);
         if (!res.ok) throw new Error('Failed to load orders');
         
         allOrders = await res.json();
 
-        // Normalize / coerce fields to avoid NaN and inconsistent types
         allOrders = (Array.isArray(allOrders) ? allOrders : [allOrders]).map(o => {
           const order = Object.assign({}, o);
           // total_amount may come as string or null

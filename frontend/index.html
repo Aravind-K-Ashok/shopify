@@ -225,7 +225,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const API_URL = "http://127.0.0.1:8000/products/";
+      const API_URL = "https://shopify-backend-m9ce.onrender.com/products/";
 
       async function loadProducts() {
         const grid = document.getElementById("products");
@@ -234,7 +234,6 @@
           if (!res.ok) throw new Error("Unable to load products 😔");
           const data = await res.json();
 
-          // helper: case-insensitive field getter
           const getField = (obj, keys) => {
             if (!obj) return undefined;
             const map = {};
@@ -272,7 +271,7 @@
             </a>
           `}).join("");
 
-          // After inserting cards, fetch average rating for each product (uses /products/{id}/reviews)
+          
           const cards = grid.querySelectorAll('.product-card');
           cards.forEach(card => {
             const pid = card.dataset.productid;

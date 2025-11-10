@@ -103,7 +103,7 @@
   </style>
 </head>
 <body>
-  <!-- shared NAVBAR -->
+  
   <div id="site-header"></div>
   <script src="js/header.js"></script>
 
@@ -120,13 +120,13 @@
   <footer>© 2025 Shopify — All rights reserved.</footer>
 
   <script>
-    // Normalize cart entries coming from different pages / formats.
+   
     let rawCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // ensure each item has: name, price (number), qty (int), image
+    
     const normalizeItem = (it) => {
       if (!it) return null;
-      // case-insensitive getter
+      
       const get = (obj, keys) => {
         if (!obj) return undefined;
         const map = {};
@@ -183,7 +183,7 @@
     }
 
     function persistCart() {
-      // persist the original-ish shape back to localStorage (keep compatibility)
+      
       const toStore = cart.map(i => ({ productid: i.productid, name: i.name, price: i.price, qty: i.qty, image: i.image }));
       localStorage.setItem('cart', JSON.stringify(toStore));
     }
@@ -207,7 +207,6 @@
         return;
       }
 
-      // Redirect to payment page
       location.href = 'payment.html';
     }
 

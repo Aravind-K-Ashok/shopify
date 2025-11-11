@@ -212,7 +212,7 @@
 
   <script>
     // Initialize global variables
-    const API = 'http://127.0.0.1:8000/orders';
+    const API = 'https://shopify-backend-m9ce.onrender.com/orders';
     let customerOrders = [];
     let sellerOrders = [];
     let currentView;
@@ -333,7 +333,7 @@
           amount = parseFloat(order.transaction.amount);
         } else {
           // Calculate amount from product price * qty if no transaction exists
-          const productRes = await fetch(`http://127.0.0.1:8000/products/${order.productid}`);
+          const productRes = await fetch(`https://shopify-backend-m9ce.onrender.com/products/${order.productid}`);
           if (!productRes.ok) throw new Error('Failed to load product details');
           const product = await productRes.json();
           const price = parseFloat(product.price);

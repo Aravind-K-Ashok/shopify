@@ -13,7 +13,7 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5cmltYmN0b2hzdXFxeHF0ZWhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzNTI3NTAsImV4cCI6MjA3NzkyODc1MH0.HGc5aemgUTUHh3j5WUA2PYZm9_QHZkCAEZriLRL5jgg";
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const API_BASE = "http://127.0.0.1:8000";
+    const API_BASE = "https://shopify-backend-m9ce.onrender.com";
     const customerID = localStorage.getItem("customerID");
 
     if (!customerID) {
@@ -72,7 +72,6 @@
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       
-      // Validate required fields
       const productName = document.getElementById("productName").value.trim();
       const description = document.getElementById("description").value.trim();
       const subcategoryId = parseInt(subcategorySelect.value);

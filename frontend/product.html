@@ -37,7 +37,7 @@
 
   <script>
     (function(){
-      const API = 'http://127.0.0.1:8000/products/';
+      const API = 'https://shopify-backend-m9ce.onrender.com/products/';
       function q(name){
         const url = new URL(location.href);
         return url.searchParams.get(name);
@@ -132,7 +132,7 @@
             const productid = p.productid ?? p.id;
             const qty = 1;
             try {
-              const url = `http://127.0.0.1:8000/orders/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(productid)}&qty=${encodeURIComponent(qty)}`;
+              const url = `https://shopify-backend-m9ce.onrender.com/orders/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(productid)}&qty=${encodeURIComponent(qty)}`;
               const res = await fetch(url, { method: 'POST' });
               const data = await res.json();
               if (!res.ok || data.error) {

@@ -210,7 +210,7 @@
     });
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/customers/register?${payload.toString()}`, {
+      const res = await fetch(`https://shopify-backend-m9ce.onrender.com/customers/register?${payload.toString()}`, {
         method: "POST",
         headers: { accept: "application/json" }
       });

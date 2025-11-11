@@ -180,14 +180,8 @@
         grid.innerHTML = `<p style="color:gray;">No products found.</p>`;
         return;
       }
-
+      
       products.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "card";
-        const imageUrl = p.images_url?.startsWith("http")
-          ? p.images_url
-          : `https://pyrimbctohsuqqxqtehq.supabase.co/storage/v1/object/public/product-images/${p.images_url}`;
-
         // helper: case-insensitive key lookup for multiple possible field names
         const getField = (obj, names) => {
           for (const n of names) {
@@ -198,6 +192,19 @@
           return undefined;
         };
 
+        // determine canonical id for product page (try several common names)
+        const productId = getField(p, ['productid','product_id','id','productId']) || getField(p, ['id']) || '';
+
+        const link = document.createElement('a');
+        link.className = 'card';
+        link.href = `product.html?productid=${encodeURIComponent(productId)}`;
+        link.style.textDecoration = 'none';
+        link.style.color = 'inherit';
+
+        const imageUrl = p.images_url?.startsWith("http")
+          ? p.images_url
+          : `https://pyrimbctohsuqqxqtehq.supabase.co/storage/v1/object/public/product-images/${p.images_url}`;
+
         // Robust title handling: try several common column names (case-insensitive)
         const title = getField(p, ["product_name", "productname", "product name", "name"]) || (p.description ? (p.description.length > 40 ? p.description.slice(0, 40) + "…" : p.description) : "Unnamed Product");
 
@@ -206,7 +213,7 @@
         const numPrice = rawPriceVal !== undefined && rawPriceVal !== null ? Number(rawPriceVal) : NaN;
         const priceHtml = Number.isFinite(numPrice) ? `₹${numPrice.toFixed(2)}` : "N/A";
 
-        card.innerHTML = `
+        link.innerHTML = `
           <img src="${imageUrl}" alt="Product image">
           <h3>${title}</h3>
           <p>${p.description || "No description provided."}</p>
@@ -215,7 +222,8 @@
           <p>⭐ ${p.rating ?? 0}</p>
           <p style="font-size:0.8rem;color:#888;">Seller ID: ${p.sellerid}</p>
         `;
-        grid.appendChild(card);
+
+        grid.appendChild(link);
       });
     }
 

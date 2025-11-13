@@ -37,7 +37,7 @@
 
   <script>
     (function(){
-      const API = 'https://
+      const API = 'https://shopify-backend-m9ce.onrender.com/products/';
       function q(name){
         const url = new URL(location.href);
         return url.searchParams.get(name);
@@ -82,7 +82,7 @@
           const priceVal = Number(getField(p, ['price','price_usd','price_inr']) || 0);
           const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(isNaN(priceVal) ? 0 : priceVal);
 
-          const imgSrc = img || 'https://
+          const imgSrc = img || 'https://via.placeholder.com/360x360?text=No+Image';
           container.innerHTML = `
             <img class="product-img" src="${imgSrc}" alt="${name}" loading="lazy" style="width:360px;height:360px;border-radius:12px;object-fit:cover;" />
             <div class="meta">

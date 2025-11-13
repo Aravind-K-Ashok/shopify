@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product — Shopify</title>
-  <link href="https://
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     body { background:#070707; color:#fff; font-family:Poppins, sans-serif; margin:0; }
@@ -132,7 +132,7 @@
             const productid = p.productid ?? p.id;
             const qty = 1;
             try {
-              const url = `https://
+              const url = `https://shopify-backend-m9ce.onrender.com/orders/create?productid=${productid}&customerid=${customerid}&qty=${qty}`;
               const res = await fetch(url, { method: 'POST' });
               const data = await res.json();
               if (!res.ok || data.error) {

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaction History — Shopify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    .header {
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 20px;
+    }
+
+    .header h1 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+    }
+
+    .transactions {
+      display: grid;
+      gap: 16px;
+    }
+
+    .transaction-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .transaction-card .status {
+      font-size: 24px;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,191,166,0.1);
+      border-radius: 25px;
+    }
+
+    .transaction-card .status.pending { background: rgba(255,193,7,0.1); }
+    .transaction-card .status.completed { background: rgba(0,191,166,0.1); }
+    .transaction-card .status.refunded { background: rgba(244,67,54,0.1); }
+
+    .transaction-card .info h3 {
+      color: var(--text-light);
+      margin-bottom: 8px;
+    }
+
+    .transaction-card .info p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .transaction-card .amount {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .filter {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter button {
+      background: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .filter button:hover,
+    .filter button.active {
+      background: var(--accent);
+      color: black;
+      border-color: var(--accent);
+    }
+
+    
+    #view-selector {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    #view-selector button {
+      padding: 10px 25px;
+      font-size: 1.1rem;
+      border-radius: 25px;
+      background: none;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    #view-selector button.active {
+      background: var(--accent);
+      color: black;
+    }
+
+    
+    #seller-view .transaction-card {
+      border-left: 4px solid var(--accent);
+    }
+
+    #customer-view .transaction-card {
+      border-left: 4px solid var(--sub);
+    }
+
+    .payment-status {
+      font-size: 0.8em;
+      color: var(--text-muted);
+      margin-top: 5px;
+      padding: 4px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      display: inline-block;
+    }
+
+    @media (max-width: 600px) {
+      .transaction-card {
+        grid-template-columns: auto 1fr;
+      }
+      .transaction-card .amount {
+        grid-column: 2;
+        justify-self: start;
+      }
+      #view-selector {
+        flex-direction: column;
+      }
+      #view-selector button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <div class="container">
+    <div class="header">
+      <h1>Transaction History</h1>
+      <p>View and track your transactions</p>
+    </div>
+
+    <div id="view-selector" style="margin-bottom:20px; display:none;">
+      <button class="filter-btn active" onclick="switchView('seller')">Seller View</button>
+      <button class="filter-btn" onclick="switchView('customer')">Customer View</button>
+    </div>
+
+    
+    <div id="customer-view">
+      <div class="filter">
+        <button onclick="filterTransactions('all', 'customer')" class="active">All</button>
+        <button onclick="filterTransactions('completed', 'customer')">Completed</button>
+        <button onclick="filterTransactions('pending', 'customer')">Pending</button>
+        <button onclick="filterTransactions('refunded', 'customer')">Refunded</button>
+      </div>
+
+      <div id="customer-transactions" class="transactions">
+        
+      </div>
+    </div>
+
+    
+    <div id="seller-view" style="display:none;">
+      <div class="filter">
+        <button onclick="filterTransactions('all', 'seller')" class="active">All Orders</button>
+        <button onclick="filterTransactions('pending', 'seller')">Pending</button>
+        <button onclick="filterTransactions('dispatched', 'seller')">Dispatched</button>
+        <button onclick="filterTransactions('delivered', 'seller')">Delivered</button>
+      </div>
+
+      <div id="seller-transactions" class="transactions">
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+    const API = 'https://shopify-backend-m9ce.onrender.com/orders';
+    let customerOrders = [];
+    let sellerOrders = [];
+    let currentView;
+
+    
+    const statusEmoji = {
+      'Pending': '⏳',
+      'Completed': '✅',
+      'Refunded': '↩️',
+      'Cancelled': '❌',
+      'Dispatched': '🚚',
+      'Delivered': '📦'
+    };
+    
+    
+    const customerid = localStorage.getItem('customerID');
+    const sellerid = localStorage.getItem('sellerID');
+    
+    
+    currentView = sellerid && !customerid ? 'seller' : 'customer';
+
+    
+    if (!customerid && !sellerid) {
+      location.href = './login.html';
+    }
+    if (customerid || sellerid) {
+      if (customerid && sellerid) {
+        
+        document.getElementById('view-selector').style.display = 'flex';
+        document.getElementById('customer-view').style.display = currentView === 'customer' ? 'block' : 'none';
+        document.getElementById('seller-view').style.display = currentView === 'seller' ? 'block' : 'none';
+      } else if (sellerid) {
+        
+        document.getElementById('view-selector').style.display = 'none';
+        document.getElementById('customer-view').style.display = 'none';
+        document.getElementById('seller-view').style.display = 'block';
+        currentView = 'seller';
+      } else if (customerid) {
+        
+        document.getElementById('view-selector').style.display = 'none';
+        document.getElementById('customer-view').style.display = 'block';
+        document.getElementById('seller-view').style.display = 'none';
+        currentView = 'customer';
+      }
+      
+      
+      if (currentView === 'seller') {
+        loadSellerOrders();
+      } else {
+        loadCustomerOrders();
+      }
+    } else {
+      location.href = './login.html'; 
+    }
+
+    
+
+    
+    function switchView(view) {
+      currentView = view;
+      document.querySelectorAll('#view-selector button').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(view));
+      });
+      document.getElementById('customer-view').style.display = view === 'customer' ? 'block' : 'none';
+      document.getElementById('seller-view').style.display = view === 'seller' ? 'block' : 'none';
+      
+      
+      document.querySelectorAll('.filter button').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`#${view}-view .filter button`).classList.add('active');
+      
+      
+      if (view === 'seller') {
+        loadSellerOrders();
+      } else {
+        loadCustomerOrders();
+      }
+    }
+
+    
+    async function loadOrderDetails(orderid) {
+      try {
+        
+        const [orderRes, transRes] = await Promise.all([
+          fetch(`${API}/${orderid}`),
+          fetch(`${API}/${orderid}/transaction`)
+        ]);
+
+        if (!orderRes.ok) throw new Error('Failed to load order details');
+        const order = await orderRes.json();
+        
+        
+        let transaction = null;
+        if (transRes.ok) {
+          transaction = await transRes.json();
+        }
+
+        return { ...order, transaction };
+      } catch (e) {
+        console.error(`Error loading details for order ${orderid}:`, e);
+        return null;
+      }
+    }
+
+    
+    async function updateTransaction(orderid, status) {
+      if (!customerid) {
+        alert('Only customers can update transaction status');
+        return;
+      }
+
+      try {
+        const order = customerOrders.find(o => o.orderid === orderid);
+        if (!order) throw new Error('Order not found');
+
+        
+        let amount;
+        if (order.transaction?.amount) {
+          amount = parseFloat(order.transaction.amount);
+        } else {
+          
+          const productRes = await fetch(`https://shopify-backend-m9ce.onrender.com/products/${order.productid}`);
+          if (!productRes.ok) throw new Error('Failed to load product details');
+          const product = await productRes.json();
+          const price = parseFloat(product.price);
+          const qty = parseInt(order.qty || 1);
+          if (isNaN(price)) throw new Error('Invalid product price');
+          if (isNaN(qty)) throw new Error('Invalid quantity');
+          amount = price * qty;
+          console.log('Calculated amount:', {price, qty, total: amount});
+        }
+        
+        
+        const url = `${API}/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent(status)}`;
+        const res = await fetch(url, { method: 'POST' });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.detail || 'Failed to update transaction');
+        }
+
+        
+        if (status === 'Completed') {
+          await fetch(`${API}/${orderid}/status?new_status=Delivered`, { method: 'PUT' });
+        } else if (status === 'Cancelled' || status === 'Refunded') {
+          await fetch(`${API}/${orderid}/status?new_status=Cancelled`, { method: 'PUT' });
+        }
+
+        
+        await loadCustomerOrders();
+      } catch (e) {
+        alert('Failed to update transaction: ' + e.message);
+      }
+    }
+
+    
+    async function updateOrderStatus(orderid, status) {
+      if (!sellerid) {
+        alert('Only sellers can update order status');
+        return;
+      }
+
+      try {
+        const url = `${API}/${orderid}/status?new_status=${encodeURIComponent(status)}`;
+        const res = await fetch(url, { method: 'PUT' });
+        
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.detail || 'Failed to update status');
+        }
+
+        
+        if (status === 'Delivered') {
+          const order = sellerOrders.find(o => o.orderid === orderid);
+          if (order?.transaction) {
+            await updateTransaction(orderid, 'Completed');
+          }
+        }
+
+        
+        await loadSellerOrders();
+      } catch (e) {
+        alert('Failed to update order status: ' + e.message);
+      }
+    }
+
+    
+    async function cancelOrder(orderid) {
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+
+      try {
+        const res = await fetch(`${API}/${orderid}/cancel`, {
+          method: 'PUT'
+        });
+
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.detail || 'Failed to cancel order');
+        }
+
+        
+        await updateTransaction(orderid, 'Cancelled');
+        
+        
+        await loadTransactions();
+      } catch (e) {
+        alert('Failed to cancel order: ' + e.message);
+      }
+    }
+
+    
+    async function loadCustomerOrders() {
+      const container = document.getElementById('customer-transactions');
+      try {
+        if (!customerid) {
+          container.innerHTML = '<div class="empty">Please log in as a customer to view your orders</div>';
+          return;
+        }
+
+        
+        const ordersRes = await fetch(`${API}/customer/${customerid}`);
+        if (!ordersRes.ok) throw new Error('Failed to load orders');
+        
+        const orders = await ordersRes.json();
+        if (!orders.length) {
+          container.innerHTML = '<div class="empty">No orders found 📭<br><br><a href="index.html" class="btn">Start Shopping</a></div>';
+          return;
+        }
+
+        
+        customerOrders = await Promise.all(
+          orders.map(order => loadOrderDetails(order.orderid))
+        );
+        
+        
+        customerOrders = customerOrders.filter(Boolean)
+          .sort((a, b) => new Date(b.orderdate) - new Date(a.orderdate));
+
+        
+        renderCustomerTransactions(customerOrders);
+
+      } catch (e) {
+        container.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+      }
+    }
+
+    
+    async function loadSellerOrders() {
+      const container = document.getElementById('seller-transactions');
+      try {
+        if (!sellerid) {
+          container.innerHTML = '<div class="empty">Please log in as a seller to view received orders</div>';
+          return;
+        }
+
+        
+        const ordersRes = await fetch(`${API}/seller/${sellerid}`);
+        if (!ordersRes.ok) throw new Error('Failed to load orders');
+        
+        const orders = await ordersRes.json();
+        if (!orders.length) {
+          container.innerHTML = '<div class="empty">No orders received yet</div>';
+          return;
+        }
+
+        
+        sellerOrders = await Promise.all(
+          orders.map(order => loadOrderDetails(order.orderid))
+        );
+        
+        
+        sellerOrders = sellerOrders.filter(Boolean)
+          .sort((a, b) => new Date(b.orderdate) - new Date(a.orderdate));
+
+        
+        renderSellerTransactions(sellerOrders);
+
+      } catch (e) {
+        container.innerHTML = `<div class="empty">Error: ${e.message}</div>`;
+      }
+    }
+
+    
+    function renderCustomerTransactions(orders) {
+      const container = document.getElementById('customer-transactions');
+      const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+      container.innerHTML = orders.map(order => {
+        const date = formatDate(order.transaction?.transDate || order.orderdate);
+        
+        
+        if (!order.transaction) {
+          return `
+            <div class="transaction-card" data-orderid="${order.orderid}">
+              <div class="status pending">⏳</div>
+              <div class="info">
+                <h3>Order #${order.orderid}</h3>
+                <p>${date}</p>
+                <p style="margin-top:8px">
+                  ${order.product?.product_name || 'Product'} × ${order.qty}
+                </p>
+                <button onclick="updateTransaction(${order.orderid}, 'Completed')" class="btn-link" style="color:var(--accent)">
+                  Process Payment
+                </button>
+              </div>
+              <div class="amount">Processing...</div>
+            </div>
+          `;
+        }
+
+        const status = order.transaction.status || order.status || 'Pending';
+        const emoji = statusEmoji[status] || '📋';
+        const amount = order.transaction.amount;
+
+        
+        const canCancel = status === 'Pending';
+        const canRequestRefund = status === 'Completed' && order.status !== 'Cancelled';
+        
+        return `
+          <div class="transaction-card" data-orderid="${order.orderid}">
+            <div class="status ${status.toLowerCase()}">${emoji}</div>
+            <div class="info">
+              <h3>Order #${order.orderid}</h3>
+              <p>${date}</p>
+              <p style="margin-top:8px">
+                ${order.product?.product_name || 'Product'} × ${order.qty}
+              </p>
+              <div style="margin-top:10px">
+                ${canCancel ? `
+                  <button onclick="updateTransaction(${order.orderid}, 'Cancelled')" class="btn-link" style="color:#ff5555;margin-right:15px">
+                    Cancel Order
+                  </button>
+                ` : ''}
+                ${canRequestRefund ? `
+                  <button onclick="updateTransaction(${order.orderid}, 'Refunded')" class="btn-link" style="color:var(--text-muted)">
+                    Request Refund
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            <div class="amount">${inrFmt.format(amount)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    
+    function renderSellerTransactions(orders) {
+      const container = document.getElementById('seller-transactions');
+      const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
+
+      container.innerHTML = orders.map(order => {
+        const date = formatDate(order.transaction?.transDate || order.orderdate);
+        
+        const orderStatus = order.status || 'Pending';
+        const transactionStatus = order.transaction?.status || 'Pending';
+        const emoji = statusEmoji[orderStatus] || '📋';
+        const amount = order.transaction?.amount || 0;
+
+        
+        const canDispatch = orderStatus === 'Pending';
+        const canDeliver = orderStatus === 'Dispatched';
+        const canCancel = orderStatus === 'Pending' && transactionStatus !== 'Completed';
+        
+        return `
+          <div class="transaction-card" data-orderid="${order.orderid}">
+            <div class="status ${orderStatus.toLowerCase()}">${emoji}</div>
+            <div class="info">
+              <h3>Order #${order.orderid}</h3>
+              <p>${date}</p>
+              <p style="margin-top:8px">
+                ${order.product?.product_name || 'Product'} × ${order.qty}
+              </p>
+              <div style="margin-top:10px">
+                ${canDispatch ? `
+                  <button onclick="updateOrderStatus(${order.orderid}, 'Dispatched')" class="btn-link" style="color:var(--accent);margin-right:15px">
+                    Mark Dispatched
+                  </button>
+                ` : ''}
+                ${canDeliver ? `
+                  <button onclick="updateOrderStatus(${order.orderid}, 'Delivered')" class="btn-link" style="color:var(--accent);margin-right:15px">
+                    Mark Delivered
+                  </button>
+                ` : ''}
+                ${canCancel ? `
+                  <button onclick="updateOrderStatus(${order.orderid}, 'Cancelled')" class="btn-link" style="color:#ff5555">
+                    Cancel Order
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+            <div class="amount">${inrFmt.format(amount)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterTransactions(status, view) {
+      
+      const viewContainer = document.getElementById(`${view}-view`);
+      viewContainer.querySelectorAll('.filter button').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(status));
+      });
+
+      const orders = view === 'seller' ? sellerOrders : customerOrders;
+      const filtered = status === 'all'
+        ? orders
+        : orders.filter(order => {
+            if (view === 'seller') {
+              
+              return (order.status || '').toLowerCase() === status.toLowerCase();
+            } else {
+              
+              return (order.transaction?.status || order.status || '').toLowerCase() === status.toLowerCase();
+            }
+          });
+      
+      if (view === 'seller') {
+        renderSellerTransactions(filtered);
+      } else {
+        renderCustomerTransactions(filtered);
+      }
+    }
+
+    
+    const style = document.createElement('style');
+    style.textContent = `
+      .btn-link {
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        text-decoration: underline;
+        transition: opacity 0.3s;
+      }
+      .btn-link:hover {
+        opacity: 0.8;
+      }
+      .btn {
+        display: inline-block;
+        background: var(--accent);
+        color: black;
+        padding: 8px 20px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px var(--accent);
+      }
+    `;
+    document.head.appendChild(style);
+
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return 'N/A';
+      return new Date(dateStr).toLocaleString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    
+  </script>
+</body>
+</html>

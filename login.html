@@ -193,7 +193,7 @@
       }
 
       try {
-        const res = await fetch(`https://
+        const res = await fetch(`https://shopify-backend-m9ce.onrender.com/customers/login?customerID=${id}&password=${pw}`, {
           method: "POST"
         });
         if (res.ok) {

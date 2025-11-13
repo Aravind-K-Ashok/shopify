@@ -1,0 +1,39 @@
+<header class="navbar" style="display:flex;justify-content:space-between;align-items:center;padding:18px 40px;background:rgba(15,15,16,0.8);backdrop-filter:blur(8px);box-shadow:0 2px 20px rgba(0,0,0,0.4);position:sticky;top:0;z-index:999;">
+  <a href="./index.html" style="text-decoration:none">
+    <div class="logo">Shop<span>ify</span></div>
+  </a>
+  <nav id="nav-links">
+    <a href="./index.html" class="active">Home</a>
+    <a href="./view_products.html">Browse</a>
+    <a href="./cart.html">Cart (<span id="cart-count">0</span>)</a>
+    <a href="./login.html" id="login-link">Login</a>
+    <a href="./profile.html" id="profile-link" style="display:none;">Profile</a>
+    <button class="logout-btn" id="logout-btn" style="display:none;background:none;border:none;color:var(--muted,#a0a0a0);font-weight:750;cursor:pointer;transition:0.3s;font-size:15px;margin-left:16px;">Logout</button>
+  </nav>
+</header>
+
+<style>
+.logout-btn:hover {
+  color: var(--accent,#00bfa6) !important;
+  text-shadow: 0 0 10px var(--accent,#00bfa6);
+}
+nav a {
+  color: var(--muted,#a0a0a0);
+  margin: 0 16px;
+  text-decoration: none;
+  transition: 0.3s;
+  font-weight: 500;
+}
+nav a:hover, nav a.active {
+  color: var(--accent,#00bfa6);
+  text-shadow: 0 0 10px var(--accent,#00bfa6);
+}
+.logo {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text,#fff);
+}
+.logo span {
+  color: var(--accent,#00bfa6);
+}
+</style>

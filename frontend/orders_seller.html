@@ -1,0 +1,546 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seller Orders | Shopify</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070707;
+      --panel: #0f0f10;
+      --muted: #25fff4;
+      --accent: #00bfa6;
+      --sub: #9be7ff;
+      --star: #ffd166;
+      --glow: rgba(0, 255, 255, 0.18);
+      --radius: 14px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: var(--bg);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header.navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 28px;
+      background: rgba(15,15,16,0.92);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 1.4rem; font-weight: 600; color: white; }
+    .logo span { color: var(--accent); }
+    nav a { color: var(--muted); margin-left: 14px; text-decoration: none; }
+    nav a.active { color: var(--accent); }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 36px;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 1200px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: black;
+      border-color: transparent;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    th {
+      color: var(--sub);
+      font-weight: 500;
+    }
+
+    td {
+      color: var(--muted);
+    }
+
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+  .status-pending { background: #ffd166; color: black; }
+  .status-dispatched, .status-shipped { background: #06d6a0; color: black; }
+  .status-on-the-way { background: #06a6d6; color: white; }
+  .status-delivered { background: #118ab2; color: white; }
+  .status-cancelled { background: #ef476f; color: white; }
+
+    .btn {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .chart-container {
+      height: 300px;
+      margin-top: 20px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 14px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.6);
+      z-index: 9999;
+    }
+  </style>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  
+  <div id="site-header"></div>
+  <script src="js/header.js"></script>
+
+  <main>
+    
+    <section class="card">
+      <h2>Orders Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalOrders">-</div>
+          <div class="stat-label">Total Orders</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalRevenue">₹0</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avgOrderValue">₹0</div>
+          <div class="stat-label">Average Order Value</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="pendingOrders">-</div>
+          <div class="stat-label">Pending Orders</div>
+        </div>
+      </div>
+
+      
+      <div class="chart-container">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </section>
+
+    
+    <section class="card">
+      <h2>Order Management</h2>
+      
+      
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All Orders</button>
+        <button class="filter-btn" data-filter="pending">Pending</button>
+        <button class="filter-btn" data-filter="shipped">Shipped</button>
+        <button class="filter-btn" data-filter="delivered">Delivered</button>
+        <button class="filter-btn" data-filter="cancelled">Cancelled</button>
+      </div>
+
+      
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Products</th>
+              <th>Total Amount</th>
+              <th>Order Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTable">
+            <tr>
+              <td colspan="7" style="text-align: center;">Loading orders...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_BASE = "https://shopify-backend-m9ce.onrender.com";
+    const customerID = localStorage.getItem("customerID");
+    let sellerID = null;
+    let allOrders = [];
+    let revenueChart = null;
+
+    
+    function showToast(message, duration = 3000) {
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), duration);
+    }
+
+    
+    function formatCurrency(amount) {
+      const num = Number(amount);
+      if (!isFinite(num)) return '₹0';
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(num);
+    }
+
+    
+    function formatDate(dateStr) {
+      return new Date(dateStr).toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    
+    const VALID_STATUSES = ['Pending', 'Dispatched', 'On The Way', 'Delivered', 'Cancelled'];
+    function canonicalStatus(s) {
+      if (!s) return 'Pending';
+      const raw = String(s).trim().toLowerCase();
+      if (raw === 'pending') return 'Pending';
+      if (raw === 'dispatched' || raw === 'shipped') return 'Dispatched';
+      if (raw === 'on the way' || raw === 'on-the-way' || raw === 'ontheway') return 'On The Way';
+      if (raw === 'delivered') return 'Delivered';
+      if (raw === 'cancelled' || raw === 'canceled') return 'Cancelled';
+      
+      const found = VALID_STATUSES.find(v => v.toLowerCase() === raw);
+      return found || 'Pending';
+    }
+
+    
+    function getStatusBadge(status) {
+      const canon = canonicalStatus(status);
+      const cls = canon.replace(/\s+/g, '-').toLowerCase();
+      return `<span class="status-badge status-${cls}">${canon}</span>`;
+    }
+
+    
+    function initRevenueChart(data) {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      
+      
+      if (revenueChart) {
+        revenueChart.destroy();
+      }
+
+      revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [{
+            label: 'Daily Revenue',
+            data: data.values,
+            borderColor: '#00bfa6',
+            backgroundColor: 'rgba(0, 191, 166, 0.1)',
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#9be7ff'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#9be7ff'
+              }
+            }
+          }
+        }
+      });
+    }
+
+   
+    function updateStats() {
+      if (!allOrders.length) return;
+
+      
+      const totalOrders = allOrders.length;
+      const totalRevenue = allOrders.reduce((sum, order) => sum + order.total_amount, 0);
+      const avgOrderValue = totalRevenue / totalOrders;
+  const pendingOrders = allOrders.filter(order => canonicalStatus(order.status) === 'Pending').length;
+
+     
+      document.getElementById('totalOrders').textContent = totalOrders;
+      document.getElementById('totalRevenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('avgOrderValue').textContent = formatCurrency(avgOrderValue);
+      document.getElementById('pendingOrders').textContent = pendingOrders;
+
+      
+      const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toISOString().split('T')[0];
+      }).reverse();
+
+      const revenueData = {
+        labels: last7Days.map(date => date.split('-')[2]), 
+        values: last7Days.map(date => {
+          return allOrders
+            .filter(order => {
+              try {
+                const od = new Date(order.order_date).toISOString().split('T')[0];
+                return od === date;
+              } catch (e) { return false; }
+            })
+            .reduce((sum, order) => sum + Number(order.total_amount || 0), 0);
+        })
+      };
+
+      initRevenueChart(revenueData);
+    }
+
+  
+    async function updateOrderStatus(orderId, newStatus) {
+      try {
+        
+        const res = await fetch(`${API_BASE}/orders/${orderId}/status?new_status=${encodeURIComponent(newStatus)}`, {
+          method: 'PUT'
+        });
+
+        if (!res.ok) {
+         
+          let errorText = 'Failed to update status';
+          try {
+            const errBody = await res.json();
+            errorText = errBody.detail || errBody.error || JSON.stringify(errBody);
+          } catch (e) {
+            errorText = await res.text().catch(() => errorText);
+          }
+          throw new Error(errorText);
+        }
+
+        showToast(`✅ Order status updated to ${newStatus}`);
+        await loadOrders(); 
+      } catch (err) {
+        showToast(`❌ ${err.message}`);
+        console.error('Update status error:', err);
+      }
+    }
+
+    
+    function renderOrders(orders) {
+      const tbody = document.getElementById('ordersTable');
+      
+      if (!orders.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No orders found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = orders.map(order => {
+        const status = canonicalStatus(order.status);
+        const statusClass = status.replace(/\s+/g, '-').toLowerCase();
+        
+        let actionButtons = '';
+        if (status === 'Pending') {
+          actionButtons += `<button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Dispatched')">Dispatch</button>`;
+        } else if (status === 'Dispatched') {
+          actionButtons += `<button class="btn" onclick="updateOrderStatus(${order.orderid}, 'On The Way')">Mark On The Way</button>`;
+        } else if (status === 'On The Way') {
+          actionButtons += `<button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Delivered')">Mark Delivered</button>`;
+        }
+        
+        if (['Pending','Dispatched','On The Way'].includes(status)) {
+          actionButtons += ` <button class="btn" onclick="updateOrderStatus(${order.orderid}, 'Cancelled')">Cancel</button>`;
+        }
+
+        return `
+        <tr>
+          <td>#${order.orderid}</td>
+          <td>${order.customer_name || 'Unknown'}</td>
+          <td>${order.items_count} items</td>
+          <td>${formatCurrency(order.total_amount)}</td>
+          <td>${formatDate(order.order_date)}</td>
+          <td><span class="status-badge status-${statusClass}">${status}</span></td>
+          <td>${actionButtons}</td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    
+    async function loadOrders() {
+      try {
+       
+        if (!sellerID) {
+          const sRes = await fetch(`${API_BASE}/sellers/customer/${customerID}`);
+          if (!sRes.ok) throw new Error('Failed to get seller details');
+          const seller = await sRes.json();
+          sellerID = seller.sellerid;
+        }
+
+  
+  const res = await fetch(`${API_BASE}/sellers/${sellerID}/orders`);
+        if (!res.ok) throw new Error('Failed to load orders');
+        
+        allOrders = await res.json();
+
+        allOrders = (Array.isArray(allOrders) ? allOrders : [allOrders]).map(o => {
+          const order = Object.assign({}, o);
+          
+          order.total_amount = Number(order.total_amount) || 0;
+          
+          order.items_count = Number(order.items_count) || (Array.isArray(order.items) ? order.items.length : 1);
+          
+          order.order_date = order.order_date || order.created_at || new Date().toISOString();
+          
+          order.status = canonicalStatus(order.status || 'Pending');
+          
+          order.customer_name = order.customer_name || order.customer || `CUST-${order.customerid || ''}`;
+          return order;
+        });
+
+        
+        allOrders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
+
+        renderOrders(allOrders);
+        updateStats();
+      } catch (err) {
+        showToast(`❌ ${err.message}`);
+        console.error('Load orders error:', err);
+      }
+    }
+
+    
+    function filterOrders(status) {
+      if (status === 'all') {
+        renderOrders(allOrders);
+      } else {
+        const canon = canonicalStatus(status);
+        renderOrders(allOrders.filter(o => canonicalStatus(o.status) === canon));
+      }
+
+      
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === status);
+      });
+    }
+
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => filterOrders(btn.dataset.filter));
+    });
+
+    
+    if (!customerID) {
+      location.href = 'login.html';
+    } else {
+      loadOrders();
+    }
+  </script>
+</body>
+</html>

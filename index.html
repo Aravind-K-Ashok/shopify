@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shopify — Modern Shopping Redefined</title>
-  <link href="https://
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
@@ -268,9 +268,6 @@
               <button onclick='(function(e){ e.preventDefault(); e.stopPropagation(); addToCart(${JSON.stringify(cartItem)}); })(event)'>Add to Cart</button>
               <button onclick='(function(e){ e.preventDefault(); e.stopPropagation(); addToCart(${JSON.stringify(cartItem)}, true); location.href="payment.html"; })(event)' style="background:var(--sub);margin-left:8px;">Buy Now</button>
             </a>
-          `}).join("");
-
-          
           `}).join("");
 
           const cards = grid.querySelectorAll('.product-card');

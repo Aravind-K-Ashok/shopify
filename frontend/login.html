@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | NeoShop</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    :root {
+      --bg: #0b0b0b;
+      --text: #fff;
+      --accent: #00bfa6;
+      --muted: #aaa;
+      --shadow: 0 0 25px rgba(0, 224, 255, 0.15);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    header.navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.2rem 4rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    nav a {
+      color: var(--text);
+      margin-left: 1.5rem;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover, nav a.active {
+      color: var(--accent);
+    }
+
+    main {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 90vh;
+    }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 340px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      animation: fadeIn 0.6s ease;
+    }
+
+    .login-card h2 {
+      margin-bottom: 1.5rem;
+      color: var(--accent);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      margin: 0.6rem 0;
+      border-radius: 30px;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      outline: none;
+      transition: border 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    input.error {
+      border-color: #ff3b3b;
+      box-shadow: 0 0 10px rgba(255, 59, 59, 0.5);
+    }
+
+    input::placeholder {
+      color: #aaa;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 1rem;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .register-link {
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .register-link a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">Shop<span>ify</span></div>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="cart.html">Cart</a>
+      <a href="#" class="active">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="login-card">
+      <h2>Welcome Back</h2>
+      <input type="text" id="userid" placeholder="Customer ID (6 digits)" maxlength="6" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <p class="register-link">New user? <a href="register.html">Register here</a></p>
+    </div>
+  </main>
+
+  <footer>© 2025 NeoShop — All rights reserved. 🇮🇳</footer>
+
+  <script>
+    async function login() {
+      const idInput = document.getElementById("userid");
+      const pwInput = document.getElementById("password");
+
+      idInput.classList.remove("error");
+      pwInput.classList.remove("error");
+
+      const id = idInput.value.trim();
+      const pw = pwInput.value.trim();
+
+      if (!/^[0-9]{6}$/.test(id)) {
+        alert("⚠️ Customer ID must be a 6-digit number.");
+        idInput.classList.add("error");
+        return;
+      }
+      if (pw.length < 4) {
+        alert("⚠️ Password must be at least 4 characters.");
+        pwInput.classList.add("error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://shopify-backend-m9ce.onrender.com/customers/login?customerID=${id}&password=${pw}`, {
+          method: "POST"
+        });
+        if (res.ok) {
+          alert("✅ Login successful!");
+          localStorage.setItem("customerID", id);
+          window.location.href = "index.html";
+        } else {
+          const err = await res.json();
+          alert("❌ " + err.detail);
+        }
+      } catch (error) {
+        alert("❌ Unable to connect to the server. Please check your internet or backend.");
+      }
+    }
+  </script>
+</body>
+</html>

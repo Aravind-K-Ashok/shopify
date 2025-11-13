@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Transaction History — Shopify</title>
-  <link href="https://
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .container {
@@ -333,7 +333,7 @@
           amount = parseFloat(order.transaction.amount);
         } else {
           
-          const productRes = await fetch(`https://
+          const productRes = await fetch(`https://shopify-backend-m9ce.onrender.com/products/${order.productid}`);
           if (!productRes.ok) throw new Error('Failed to load product details');
           const product = await productRes.json();
           const price = parseFloat(product.price);

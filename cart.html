@@ -141,7 +141,7 @@
       const price = Number(priceRaw) || 0;
       const name = get(it, ['product_name','name','title']) || get(it, ['description']) || 'Untitled';
       const imageField = get(it, ['images_url','image','image_url','images']) || '';
-      const image = (typeof imageField === 'string' && imageField.split(',')[0].trim()) || imageField || 'https://via.placeholder.com/70';
+      const image = (typeof imageField === 'string' && imageField.split(',')[0].trim()) || imageField || 'https://
       const qty = parseInt(get(it, ['qty','quantity']) ?? get(it, ['count']) ?? 1) || 1;
       const productid = get(it, ['productid','id','product_id']) || null;
 
@@ -168,7 +168,7 @@
         total += (Number(item.price) || 0) * (Number(item.qty) || 1);
         container.innerHTML += `
           <div class="cart-item">
-            <img src="${item.image || 'https://via.placeholder.com/70'}" alt="">
+            <img src="${item.image || 'https://
             <div class="cart-info">
               <h3>${item.name}</h3>
               <p>Qty: ${item.qty}</p>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Product — Shopify</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <link rel="stylesheet" href="css/style.css" />
   <style>
     body { background:#070707; color:#fff; font-family:Poppins, sans-serif; margin:0; }
@@ -18,7 +18,7 @@
     .actions { display:flex; gap:12px; margin-top:18px; }
     .actions button { background:#00bfa6; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:700; }
     .actions button.secondary { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.08); }
-  /* reviews */
+  
   .reviews { margin-top:24px; background:rgba(255,255,255,0.02); padding:16px; border-radius:12px; }
   .review { border-bottom:1px solid rgba(255,255,255,0.04); padding:12px 0; }
   .review:last-child { border-bottom: none; }
@@ -37,7 +37,7 @@
 
   <script>
     (function(){
-      const API = 'https://shopify-backend-m9ce.onrender.com/products/';
+      const API = 'https://
       function q(name){
         const url = new URL(location.href);
         return url.searchParams.get(name);
@@ -65,7 +65,7 @@
           const res = await fetch(API + pid);
           if(!res.ok) throw new Error('Failed to load product');
           const p = await res.json();
-          // case-insensitive getter
+          
           const getField = (obj, keys) => {
             if (!obj) return undefined;
             const map = {};
@@ -82,7 +82,7 @@
           const priceVal = Number(getField(p, ['price','price_usd','price_inr']) || 0);
           const inr = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(isNaN(priceVal) ? 0 : priceVal);
 
-          const imgSrc = img || 'https://via.placeholder.com/360x360?text=No+Image';
+          const imgSrc = img || 'https://
           container.innerHTML = `
             <img class="product-img" src="${imgSrc}" alt="${name}" loading="lazy" style="width:360px;height:360px;border-radius:12px;object-fit:cover;" />
             <div class="meta">
@@ -132,14 +132,14 @@
             const productid = p.productid ?? p.id;
             const qty = 1;
             try {
-              const url = `https://shopify-backend-m9ce.onrender.com/orders/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(productid)}&qty=${encodeURIComponent(qty)}`;
+              const url = `https://
               const res = await fetch(url, { method: 'POST' });
               const data = await res.json();
               if (!res.ok || data.error) {
                 alert('Purchase failed: ' + (data.detail || data.error || JSON.stringify(data)));
               } else {
                 alert(data.message || 'Purchase successful');
-                // optional: go to cart or orders
+                
                 location.href = './cart.html';
               }
             } catch (e) {
@@ -147,7 +147,7 @@
             }
           });
 
-          // Reviews: load and submit
+          
           let currentReviewPage = 1;
           let reviewsTotal = 0;
           const perPage = 10;
@@ -161,14 +161,14 @@
                 return;
               }
               const data = await r.json();
-              // backend returns { reviews: [], total: n, avg_rating: x }
+              
               const reviews = Array.isArray(data) ? data : (data.reviews || []);
               const total = data.total || (Array.isArray(data) ? data.length : 0);
               const avg = data.avg_rating || 0;
               currentReviewPage = page;
               reviewsTotal = total;
 
-              // Show average rating header
+              
               const avgHtml = `<div style="margin-bottom:8px;color:#9be7ff">Average rating: <strong>${avg.toFixed(1)}</strong> (${total} reviews)</div>`;
 
               if (!reviews.length) {
@@ -186,7 +186,7 @@
             } catch (e) {
               list.innerHTML = '<div class="muted">Failed to load reviews.</div>';
             }
-            // update pager
+            
             const pager = document.getElementById('reviewsPager');
             const totalPages = Math.max(1, Math.ceil(reviewsTotal / perPage));
             pager.textContent = `Page ${currentReviewPage} of ${totalPages}`;
@@ -218,7 +218,7 @@
             }
           });
 
-          // pagination buttons
+          
           document.getElementById('prevReviews').addEventListener('click', () => {
             if (currentReviewPage > 1) loadReviews(currentReviewPage - 1);
           });
@@ -226,7 +226,7 @@
             loadReviews(currentReviewPage + 1);
           });
 
-          // initial reviews load
+          
           loadReviews();
 
         }catch(e){

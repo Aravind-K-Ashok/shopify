@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Seller Orders | Shopify</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <style>
     :root {
       --bg: #070707;
@@ -178,16 +178,16 @@
       z-index: 9999;
     }
   </style>
-  <!-- Include Chart.js for visualizations -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script src="https://
 </head>
 <body>
-  <!-- shared NAVBAR -->
+  
   <div id="site-header"></div>
   <script src="js/header.js"></script>
 
   <main>
-    <!-- Stats Overview -->
+    
     <section class="card">
       <h2>Orders Overview</h2>
       <div class="stats-grid">
@@ -209,17 +209,17 @@
         </div>
       </div>
 
-      <!-- Revenue Chart -->
+      
       <div class="chart-container">
         <canvas id="revenueChart"></canvas>
       </div>
     </section>
 
-    <!-- Orders List -->
+    
     <section class="card">
       <h2>Order Management</h2>
       
-      <!-- Filters -->
+      
       <div class="filters">
         <button class="filter-btn active" data-filter="all">All Orders</button>
         <button class="filter-btn" data-filter="pending">Pending</button>
@@ -228,7 +228,7 @@
         <button class="filter-btn" data-filter="cancelled">Cancelled</button>
       </div>
 
-      <!-- Orders Table -->
+      
       <div style="overflow-x: auto;">
         <table>
           <thead>
@@ -253,13 +253,13 @@
   </main>
 
   <script>
-    const API_BASE = "https://shopify-backend-m9ce.onrender.com";
+    const API_BASE = "https://
     const customerID = localStorage.getItem("customerID");
     let sellerID = null;
     let allOrders = [];
     let revenueChart = null;
 
-    // Toast notification
+    
     function showToast(message, duration = 3000) {
       const toast = document.createElement('div');
       toast.className = 'toast';
@@ -268,7 +268,7 @@
       setTimeout(() => toast.remove(), duration);
     }
 
-    // Format currency
+    
     function formatCurrency(amount) {
       const num = Number(amount);
       if (!isFinite(num)) return '₹0';
@@ -279,7 +279,7 @@
       }).format(num);
     }
 
-    // Format date
+    
     function formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString('en-IN', {
         year: 'numeric',
@@ -290,7 +290,7 @@
       });
     }
 
-    // Normalize status to backend-expected canonical form
+    
     const VALID_STATUSES = ['Pending', 'Dispatched', 'On The Way', 'Delivered', 'Cancelled'];
     function canonicalStatus(s) {
       if (!s) return 'Pending';
@@ -491,20 +491,20 @@
 
         allOrders = (Array.isArray(allOrders) ? allOrders : [allOrders]).map(o => {
           const order = Object.assign({}, o);
-          // total_amount may come as string or null
+          
           order.total_amount = Number(order.total_amount) || 0;
-          // items_count might be provided or infer from items array
+          
           order.items_count = Number(order.items_count) || (Array.isArray(order.items) ? order.items.length : 1);
-          // ensure order_date exists and is ISO-like string
+          
           order.order_date = order.order_date || order.created_at || new Date().toISOString();
-          // normalize status to upper-case
+          
           order.status = canonicalStatus(order.status || 'Pending');
-          // optional customer name
+          
           order.customer_name = order.customer_name || order.customer || `CUST-${order.customerid || ''}`;
           return order;
         });
 
-        // Sort by date descending
+        
         allOrders.sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
 
         renderOrders(allOrders);
@@ -515,7 +515,7 @@
       }
     }
 
-    // Filter orders
+    
     function filterOrders(status) {
       if (status === 'all') {
         renderOrders(allOrders);
@@ -524,18 +524,18 @@
         renderOrders(allOrders.filter(o => canonicalStatus(o.status) === canon));
       }
 
-      // Update active filter button
+      
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === status);
       });
     }
 
-    // Wire up filter buttons
+    
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.addEventListener('click', () => filterOrders(btn.dataset.filter));
     });
 
-    // Check login and load orders
+    
     if (!customerID) {
       location.href = 'login.html';
     } else {

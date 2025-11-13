@@ -150,7 +150,7 @@
 </head>
 <body>
   <header class="navbar">
-    <div class="logo">Neo<span>Shop</span></div>
+    <div class="logo">Shop<span>ify</span></div>
     <nav>
       <a href="index.html">Home</a>
       <a href="cart.html">Cart</a>
@@ -175,14 +175,12 @@
       const idInput = document.getElementById("userid");
       const pwInput = document.getElementById("password");
 
-     
       idInput.classList.remove("error");
       pwInput.classList.remove("error");
 
       const id = idInput.value.trim();
       const pw = pwInput.value.trim();
 
-      
       if (!/^[0-9]{6}$/.test(id)) {
         alert("⚠️ Customer ID must be a 6-digit number.");
         idInput.classList.add("error");
@@ -195,12 +193,12 @@
       }
 
       try {
-        const res = await fetch(`https://shopify-backend-m9ce.onrender.com/customers/login?customerID=${id}&password=${pw}`, {
+        const res = await fetch(`https://
           method: "POST"
         });
         if (res.ok) {
           alert("✅ Login successful!");
-          localStorage.setItem("customerID", id); // store for later use (e.g., cart)
+          localStorage.setItem("customerID", id);
           window.location.href = "index.html";
         } else {
           const err = await res.json();

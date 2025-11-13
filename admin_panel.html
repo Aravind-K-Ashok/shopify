@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel | Shopify</title>
   <link rel="stylesheet" href="css/style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <style>
     :root {
       --bg: #070707;
@@ -105,7 +105,7 @@
 </head>
 
 <body>
-  <!-- shared NAVBAR -->
+  
   <div id="site-header"></div>
   <script src="js/header.js"></script>
 
@@ -138,7 +138,7 @@
   </main>
 
   <script>
-    const API_BASE = "https://shopify-backend-m9ce.onrender.com";
+    const API_BASE = "https://
     const adminID = localStorage.getItem("customerID");
 
     if (!adminID) {
@@ -157,7 +157,7 @@
       setTimeout(() => t.remove(), 2500);
     }
 
-    // ✅ CATEGORY MANAGEMENT
+    
     async function addCategory() {
       const name = document.getElementById("categoryName").value.trim();
       if (!name) return showToast("⚠️ Enter a category name.");
@@ -206,14 +206,14 @@
           select.appendChild(opt);
         });
 
-        if (cats.length > 0) loadSubcategories(); // auto-load first category's subcategories
+        if (cats.length > 0) loadSubcategories(); 
       } catch (err) {
         console.error("loadCategories error:", err);
         showToast("Network error: Could not load categories.");
       }
     }
 
-    // ✅ SUBCATEGORY MANAGEMENT
+    
     async function addSubcategory() {
       const name = document.getElementById("subcatName").value.trim();
       const catid = document.getElementById("parentCategory").value;
@@ -275,7 +275,7 @@
       }
     }
 
-    // ✅ PRODUCT ADDITION
+    
     async function addProduct() {
       const desc = document.getElementById("productDesc").value.trim();
       const stock = document.getElementById("productStock").value;
@@ -307,7 +307,7 @@
       setTimeout(() => (window.location.href = "login.html"), 800);
     }
 
-    // Load on start
+    
     loadCategories();
   </script>
 </body>

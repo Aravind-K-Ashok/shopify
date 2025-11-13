@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Transaction History — Shopify</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .container {
@@ -105,7 +105,7 @@
       border-color: var(--accent);
     }
 
-    /* View selector styles */
+    
     #view-selector {
       display: flex;
       justify-content: center;
@@ -129,7 +129,7 @@
       color: black;
     }
 
-    /* View specific styles */
+    
     #seller-view .transaction-card {
       border-left: 4px solid var(--accent);
     }
@@ -166,7 +166,7 @@
   </style>
 </head>
 <body>
-  <!-- shared NAVBAR -->
+  
   <div id="site-header"></div>
   <script src="js/header.js"></script>
 
@@ -181,7 +181,7 @@
       <button class="filter-btn" onclick="switchView('customer')">Customer View</button>
     </div>
 
-    <!-- Customer View -->
+    
     <div id="customer-view">
       <div class="filter">
         <button onclick="filterTransactions('all', 'customer')" class="active">All</button>
@@ -191,11 +191,11 @@
       </div>
 
       <div id="customer-transactions" class="transactions">
-        <!-- Customer's transactions will be loaded here -->
+        
       </div>
     </div>
 
-    <!-- Seller View -->
+    
     <div id="seller-view" style="display:none;">
       <div class="filter">
         <button onclick="filterTransactions('all', 'seller')" class="active">All Orders</button>
@@ -205,19 +205,19 @@
       </div>
 
       <div id="seller-transactions" class="transactions">
-        <!-- Seller's transactions will be loaded here -->
+        
       </div>
     </div>
   </div>
 
   <script>
-    // Initialize global variables
-    const API = 'https://shopify-backend-m9ce.onrender.com/orders';
+    
+    const API = 'https://
     let customerOrders = [];
     let sellerOrders = [];
     let currentView;
 
-    // Status emoji map
+    
     const statusEmoji = {
       'Pending': '⏳',
       'Completed': '✅',
@@ -227,50 +227,50 @@
       'Delivered': '📦'
     };
     
-    // Get user IDs from localStorage
+    
     const customerid = localStorage.getItem('customerID');
     const sellerid = localStorage.getItem('sellerID');
     
-    // Set initial view based on user role
+    
     currentView = sellerid && !customerid ? 'seller' : 'customer';
 
-    // Redirect if not logged in
+    
     if (!customerid && !sellerid) {
       location.href = './login.html';
     }
     if (customerid || sellerid) {
       if (customerid && sellerid) {
-        // User has both roles - show selector and initialize both views
+        
         document.getElementById('view-selector').style.display = 'flex';
         document.getElementById('customer-view').style.display = currentView === 'customer' ? 'block' : 'none';
         document.getElementById('seller-view').style.display = currentView === 'seller' ? 'block' : 'none';
       } else if (sellerid) {
-        // Seller only - force seller view
+        
         document.getElementById('view-selector').style.display = 'none';
         document.getElementById('customer-view').style.display = 'none';
         document.getElementById('seller-view').style.display = 'block';
         currentView = 'seller';
       } else if (customerid) {
-        // Customer only - force customer view
+        
         document.getElementById('view-selector').style.display = 'none';
         document.getElementById('customer-view').style.display = 'block';
         document.getElementById('seller-view').style.display = 'none';
         currentView = 'customer';
       }
       
-      // Load the appropriate view data
+      
       if (currentView === 'seller') {
         loadSellerOrders();
       } else {
         loadCustomerOrders();
       }
     } else {
-      location.href = './login.html'; // Not logged in
+      location.href = './login.html'; 
     }
 
-    // Initialize data arrays
+    
 
-    // Switch between seller and customer views
+    
     function switchView(view) {
       currentView = view;
       document.querySelectorAll('#view-selector button').forEach(btn => {
@@ -279,11 +279,11 @@
       document.getElementById('customer-view').style.display = view === 'customer' ? 'block' : 'none';
       document.getElementById('seller-view').style.display = view === 'seller' ? 'block' : 'none';
       
-      // Reset filters
+      
       document.querySelectorAll('.filter button').forEach(btn => btn.classList.remove('active'));
       document.querySelector(`#${view}-view .filter button`).classList.add('active');
       
-      // Load appropriate data
+      
       if (view === 'seller') {
         loadSellerOrders();
       } else {
@@ -291,10 +291,10 @@
       }
     }
 
-    // Load order details with transaction info
+    
     async function loadOrderDetails(orderid) {
       try {
-        // Load order details and transaction in parallel
+        
         const [orderRes, transRes] = await Promise.all([
           fetch(`${API}/${orderid}`),
           fetch(`${API}/${orderid}/transaction`)
@@ -303,7 +303,7 @@
         if (!orderRes.ok) throw new Error('Failed to load order details');
         const order = await orderRes.json();
         
-        // Transaction might not exist yet
+        
         let transaction = null;
         if (transRes.ok) {
           transaction = await transRes.json();
@@ -316,7 +316,7 @@
       }
     }
 
-    // Update transaction status (customer actions)
+    
     async function updateTransaction(orderid, status) {
       if (!customerid) {
         alert('Only customers can update transaction status');
@@ -327,13 +327,13 @@
         const order = customerOrders.find(o => o.orderid === orderid);
         if (!order) throw new Error('Order not found');
 
-        // Get or calculate amount
+        
         let amount;
         if (order.transaction?.amount) {
           amount = parseFloat(order.transaction.amount);
         } else {
-          // Calculate amount from product price * qty if no transaction exists
-          const productRes = await fetch(`https://shopify-backend-m9ce.onrender.com/products/${order.productid}`);
+          
+          const productRes = await fetch(`https://
           if (!productRes.ok) throw new Error('Failed to load product details');
           const product = await productRes.json();
           const price = parseFloat(product.price);
@@ -344,7 +344,7 @@
           console.log('Calculated amount:', {price, qty, total: amount});
         }
         
-        // Create/update transaction
+        
         const url = `${API}/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent(status)}`;
         const res = await fetch(url, { method: 'POST' });
         
@@ -353,21 +353,21 @@
           throw new Error(error.detail || 'Failed to update transaction');
         }
 
-        // Update order status for certain transaction states
+        
         if (status === 'Completed') {
           await fetch(`${API}/${orderid}/status?new_status=Delivered`, { method: 'PUT' });
         } else if (status === 'Cancelled' || status === 'Refunded') {
           await fetch(`${API}/${orderid}/status?new_status=Cancelled`, { method: 'PUT' });
         }
 
-        // Refresh data
+        
         await loadCustomerOrders();
       } catch (e) {
         alert('Failed to update transaction: ' + e.message);
       }
     }
 
-    // Update order status (seller actions)
+    
     async function updateOrderStatus(orderid, status) {
       if (!sellerid) {
         alert('Only sellers can update order status');
@@ -383,7 +383,7 @@
           throw new Error(error.detail || 'Failed to update status');
         }
 
-        // Auto-update transaction for delivered orders
+        
         if (status === 'Delivered') {
           const order = sellerOrders.find(o => o.orderid === orderid);
           if (order?.transaction) {
@@ -391,14 +391,14 @@
           }
         }
 
-        // Refresh seller view
+        
         await loadSellerOrders();
       } catch (e) {
         alert('Failed to update order status: ' + e.message);
       }
     }
 
-    // Cancel an order
+    
     async function cancelOrder(orderid) {
       if (!confirm('Are you sure you want to cancel this order?')) return;
 
@@ -412,17 +412,17 @@
           throw new Error(error.detail || 'Failed to cancel order');
         }
 
-        // Update transaction to cancelled
+        
         await updateTransaction(orderid, 'Cancelled');
         
-        // Refresh data
+        
         await loadTransactions();
       } catch (e) {
         alert('Failed to cancel order: ' + e.message);
       }
     }
 
-    // Load customer orders and transactions
+    
     async function loadCustomerOrders() {
       const container = document.getElementById('customer-transactions');
       try {
@@ -431,7 +431,7 @@
           return;
         }
 
-        // Get customer orders
+        
         const ordersRes = await fetch(`${API}/customer/${customerid}`);
         if (!ordersRes.ok) throw new Error('Failed to load orders');
         
@@ -441,16 +441,16 @@
           return;
         }
 
-        // Load details for each order
+        
         customerOrders = await Promise.all(
           orders.map(order => loadOrderDetails(order.orderid))
         );
         
-        // Filter and sort
+        
         customerOrders = customerOrders.filter(Boolean)
           .sort((a, b) => new Date(b.orderdate) - new Date(a.orderdate));
 
-        // Render customer view
+        
         renderCustomerTransactions(customerOrders);
 
       } catch (e) {
@@ -458,7 +458,7 @@
       }
     }
 
-    // Load seller orders and transactions
+    
     async function loadSellerOrders() {
       const container = document.getElementById('seller-transactions');
       try {
@@ -467,7 +467,7 @@
           return;
         }
 
-        // Get seller orders
+        
         const ordersRes = await fetch(`${API}/seller/${sellerid}`);
         if (!ordersRes.ok) throw new Error('Failed to load orders');
         
@@ -477,16 +477,16 @@
           return;
         }
 
-        // Load details for each order
+        
         sellerOrders = await Promise.all(
           orders.map(order => loadOrderDetails(order.orderid))
         );
         
-        // Filter and sort
+        
         sellerOrders = sellerOrders.filter(Boolean)
           .sort((a, b) => new Date(b.orderdate) - new Date(a.orderdate));
 
-        // Render seller view
+        
         renderSellerTransactions(sellerOrders);
 
       } catch (e) {
@@ -494,7 +494,7 @@
       }
     }
 
-    // Render customer transactions
+    
     function renderCustomerTransactions(orders) {
       const container = document.getElementById('customer-transactions');
       const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
@@ -502,7 +502,7 @@
       container.innerHTML = orders.map(order => {
         const date = formatDate(order.transaction?.transDate || order.orderdate);
         
-        // Handle orders without transactions
+        
         if (!order.transaction) {
           return `
             <div class="transaction-card" data-orderid="${order.orderid}">
@@ -526,7 +526,7 @@
         const emoji = statusEmoji[status] || '📋';
         const amount = order.transaction.amount;
 
-        // Customer actions available based on status
+        
         const canCancel = status === 'Pending';
         const canRequestRefund = status === 'Completed' && order.status !== 'Cancelled';
         
@@ -558,7 +558,7 @@
       }).join('');
     }
 
-    // Render seller transactions
+    
     function renderSellerTransactions(orders) {
       const container = document.getElementById('seller-transactions');
       const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
@@ -571,7 +571,7 @@
         const emoji = statusEmoji[orderStatus] || '📋';
         const amount = order.transaction?.amount || 0;
 
-        // Seller actions based on order status
+        
         const canDispatch = orderStatus === 'Pending';
         const canDeliver = orderStatus === 'Dispatched';
         const canCancel = orderStatus === 'Pending' && transactionStatus !== 'Completed';
@@ -610,7 +610,7 @@
     }
 
     function filterTransactions(status, view) {
-      // Update active button
+      
       const viewContainer = document.getElementById(`${view}-view`);
       viewContainer.querySelectorAll('.filter button').forEach(btn => {
         btn.classList.toggle('active', btn.textContent.toLowerCase().includes(status));
@@ -621,10 +621,10 @@
         ? orders
         : orders.filter(order => {
             if (view === 'seller') {
-              // Seller view: filter by order status
+              
               return (order.status || '').toLowerCase() === status.toLowerCase();
             } else {
-              // Customer view: filter by transaction status
+              
               return (order.transaction?.status || order.status || '').toLowerCase() === status.toLowerCase();
             }
           });
@@ -636,7 +636,7 @@
       }
     }
 
-    // Add some useful styles
+    
     const style = document.createElement('style');
     style.textContent = `
       .btn-link {
@@ -667,7 +667,7 @@
     `;
     document.head.appendChild(style);
 
-    // Date formatting helper
+    
     function formatDate(dateStr) {
       if (!dateStr) return 'N/A';
       return new Date(dateStr).toLocaleString('en-IN', {
@@ -679,7 +679,7 @@
       });
     }
 
-    // Initial load happens in the role check section
+    
   </script>
 </body>
 </html>

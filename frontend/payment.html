@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Payment — Shopify</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <link rel="stylesheet" href="css/style.css" />
   <style>
     .container {
@@ -156,17 +156,17 @@
 </head>
 <body>
 
-  <!-- shared NAVBAR -->
+  
   <div id="site-header"></div>
   <script src="js/header.js"></script>
 
   <div class="container">
     <div class="payment-form">
-      <!-- Order Summary -->
+      
       <div class="order-summary">
         <h3 class="summary-title">Order Summary</h3>
         <div id="summary-items" class="summary-items">
-          <!-- Items will be listed here -->
+          
         </div>
         <div class="total">
           <span>Total Amount</span>
@@ -174,23 +174,23 @@
         </div>
       </div>
 
-      <!-- Payment Methods -->
+      
       <div class="payment-methods">
         <div class="payment-method active" data-method="card">
-          <img src="https://cdn-icons-png.flaticon.com/128/147/147258.png" alt="Card">
+          <img src="https://
           <div>Credit/Debit Card</div>
         </div>
         <div class="payment-method" data-method="upi">
-          <img src="https://cdn-icons-png.flaticon.com/128/196/196566.png" alt="UPI">
+          <img src="https://
           <div>UPI</div>
         </div>
         <div class="payment-method" data-method="cod">
-          <img src="https://cdn-icons-png.flaticon.com/128/2331/2331852.png" alt="COD">
+          <img src="https://
           <div>Cash on Delivery</div>
         </div>
       </div>
 
-      <!-- Payment Forms -->
+      
       <form id="card-form" class="payment-form-content">
         <div class="form-group">
           <label>Card Number</label>
@@ -231,17 +231,17 @@
   </div>
 
   <script>
-    // Get cart and total from localStorage/URL
+    
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const customerid = localStorage.getItem('customerID');
     if (!customerid) {
       location.href = './login.html';
     }
 
-    // Format currency
+    
     const inrFmt = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' });
 
-    // Calculate and display order summary
+    
     function displaySummary() {
       const items = document.getElementById('summary-items');
       const total = document.getElementById('total-amount');
@@ -261,7 +261,7 @@
       total.textContent = inrFmt.format(totalAmount);
     }
 
-    // Payment method switching
+    
     const methods = document.querySelectorAll('.payment-method');
     const forms = {
       card: document.getElementById('card-form'),
@@ -273,11 +273,11 @@
 
     methods.forEach(method => {
       method.addEventListener('click', () => {
-        // Update active state
+        
         methods.forEach(m => m.classList.remove('active'));
         method.classList.add('active');
 
-        // Show relevant form
+        
         const methodId = method.dataset.method;
         Object.values(forms).forEach(form => form.style.display = 'none');
         if (forms[methodId]) {
@@ -287,7 +287,7 @@
       });
     });
 
-    // Basic form validation and formatting
+    
     const cardNumber = document.getElementById('card-number');
     cardNumber?.addEventListener('input', (e) => {
       let value = e.target.value.replace(/\D/g, '');
@@ -304,13 +304,13 @@
       e.target.value = value;
     });
 
-    // Payment processing
+    
     async function processPayment() {
       const payBtn = document.getElementById('pay-btn');
       payBtn.disabled = true;
       
       try {
-        const API = 'https://shopify-backend-m9ce.onrender.com/orders';
+        const API = 'https://
         const loading = document.createElement('div');
         loading.className = 'loading';
         loading.textContent = 'Processing payment...';
@@ -318,7 +318,7 @@
 
         const results = [];
         
-        // Process each cart item as an order
+        
         for (const item of cart) {
           if (!item.productid) {
             results.push({ success: false, message: `Missing product id for ${item.name}` });
@@ -326,7 +326,7 @@
           }
 
           try {
-            // Calculate amount first
+            
             const amount = (Number(item.price) || 0) * (Number(item.qty) || 1);
             if (!amount || isNaN(amount) || amount <= 0) {
               results.push({
@@ -336,7 +336,7 @@
               continue;
             }
 
-            // Place order
+            
             const orderUrl = `${API}/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(item.productid)}&qty=${encodeURIComponent(item.qty)}`;
             const orderRes = await fetch(orderUrl, { method: 'POST' });
             const orderData = await orderRes.json();
@@ -349,7 +349,7 @@
               continue;
             }
 
-            // Extract orderid from success message
+            
             const orderMatch = orderData.message?.match(/Order (\d+) placed/);
             const orderid = orderMatch ? orderMatch[1] : null;
 
@@ -361,11 +361,11 @@
               continue;
             }
 
-            // Verify transaction exists and update if needed. Backend now completes payment on order placement,
-            // but if transaction is missing for any reason, create it as 'Completed' (instant payment completed).
+            
+            
             const transCheckRes = await fetch(`${API}/${orderid}/transaction`);
             if (!transCheckRes.ok) {
-              // Create new transaction if one doesn't exist (mark as Completed)
+              
               const transUrl = `${API}/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent('Completed')}`;
               const transRes = await fetch(transUrl, { method: 'POST' });
               const transData = await transRes.json();
@@ -392,7 +392,7 @@
         if (failed.length === 0) {
           alert('✅ Payment successful! Orders have been placed.');
           localStorage.removeItem('cart');
-          location.href = './transactions.html';  // Show order history
+          location.href = './transactions.html';  
         } else {
           alert(`Some orders failed:\n${failed.map(f => f.message).join('\n')}`);
         }
@@ -404,7 +404,7 @@
       }
     }
 
-    // Initialize
+    
     displaySummary();
     document.getElementById('pay-btn').addEventListener('click', processPayment);
   </script>

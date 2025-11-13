@@ -41,11 +41,9 @@ def get_db_config() -> Dict[str, Any]:
             "cursorclass": DictCursor,
         }
 
-    # Optional: SSL/TLS configuration if CA bundle path provided
     if ssl_ca := os.getenv("DB_SSL_CA"):
         config["ssl"] = {"ca": ssl_ca}
     
     return config
 
-# Export the config dict for compatibility with existing code
 DB_CONFIG = get_db_config()

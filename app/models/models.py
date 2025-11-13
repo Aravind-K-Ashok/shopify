@@ -3,7 +3,6 @@ from pymysql.cursors import DictCursor
 from dataclasses import dataclass, fields
 from datetime import datetime
 
-# ✅ MySQL connection config
 DB_CONFIG = {
     "host": "localhost",
     "user": "root",
@@ -12,7 +11,6 @@ DB_CONFIG = {
     "cursorclass": DictCursor
 }
 
-# --- Dataclasses ---
 @dataclass
 class Customer:
     customerid: int | None
@@ -66,7 +64,7 @@ class Order:
 
 @dataclass
 class Transaction:
-    transid: int | None  # Primary key, auto-increment
+    transid: int | None Primary key, auto-increment
     orderid: int
     customerid: int
     amount: float
@@ -75,11 +73,9 @@ class Transaction:
 
     def __post_init__(self):
         if self.transid is None:
-            # Let the database handle auto-increment
             self.transid = None
 
 
-# --- Database Manager ---
 class DatabaseManager:
     def __init__(self):
         self.conn = pymysql.connect(**DB_CONFIG)
@@ -106,20 +102,17 @@ class DatabaseManager:
             col_name = f.name
             col_type = self._python_to_sql(f.type)
 
-            # Handle primary keys and transactions special case
             if col_name == f"{cls.__name__.lower()}id" or (table_name == "transactions" and col_name == "transid"):
                 cols.append(f"{col_name} INT AUTO_INCREMENT PRIMARY KEY")
             else:
                 cols.append(f"{col_name} {col_type}")
 
-        # Drop table if it exists
         self.cursor.execute(f"DROP TABLE IF EXISTS {table_name};")
         
         create_sql = f"CREATE TABLE {table_name} ({', '.join(cols)}) ENGINE=InnoDB;"
         print(f"Creating table: {table_name}")
         self.cursor.execute(create_sql)
 
-        # Special handling for IDs
         if table_name == "customers":
             self.cursor.execute("ALTER TABLE customers AUTO_INCREMENT = 100000;")
         elif table_name == "transactions":
@@ -130,23 +123,14 @@ class DatabaseManager:
     def add_foreign_keys(self):
         """Add foreign key relationships after tables are created."""
         fk_commands = [
-            # seller.customerid → customers.customerid
             "ALTER TABLE sellers ADD CONSTRAINT fk_seller_customer FOREIGN KEY (customerid) REFERENCES customers(customerid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # subcategory.categoryid → categories.categoryid
             "ALTER TABLE subcategories ADD CONSTRAINT fk_subcat_category FOREIGN KEY (categoryid) REFERENCES categories(categoryid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # product.sellerid → sellers.sellerid
             "ALTER TABLE products ADD CONSTRAINT fk_product_seller FOREIGN KEY (sellerid) REFERENCES sellers(sellerid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # product.subcategoryid → subcategories.subcategoryid
             "ALTER TABLE products ADD CONSTRAINT fk_product_subcat FOREIGN KEY (subcategoryid) REFERENCES subcategories(subcategoryid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # orders.customerid → customers.customerid
             "ALTER TABLE orders ADD CONSTRAINT fk_order_customer FOREIGN KEY (customerid) REFERENCES customers(customerid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # orders.productid → products.productid
             "ALTER TABLE orders ADD CONSTRAINT fk_order_product FOREIGN KEY (productid) REFERENCES products(productid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # orders.sellerid → sellers.sellerid
             "ALTER TABLE orders ADD CONSTRAINT fk_order_seller FOREIGN KEY (sellerid) REFERENCES sellers(sellerid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # transaction.orderid → orders.orderid
             "ALTER TABLE transactions ADD CONSTRAINT fk_trans_order FOREIGN KEY (orderid) REFERENCES orders(orderid) ON DELETE CASCADE ON UPDATE CASCADE;",
-            # transaction.customerid → customers.customerid
             "ALTER TABLE transactions ADD CONSTRAINT fk_trans_customer FOREIGN KEY (customerid) REFERENCES customers(customerid) ON DELETE CASCADE ON UPDATE CASCADE;"
         ]
 
@@ -154,20 +138,17 @@ class DatabaseManager:
             try:
                 self.cursor.execute(cmd)
             except pymysql.err.InternalError as e:
-                # Skip if constraint already exists
                 if "errno: 1061" not in str(e):
                     print("⚠️", e)
         self.conn.commit()
         print("🔗 Foreign keys added successfully.")
 
     def create_all_tables(self, models: list):
-        # First disable foreign key checks
         self.cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
         
         for model in models:
             self.create_table_from_dataclass(model)
             
-        # Re-enable foreign key checks
         self.cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
         print("✅ All tables created successfully.")
         self.add_foreign_keys()
@@ -176,7 +157,6 @@ class DatabaseManager:
         self.conn.close()
 
 
-# --- Run Script ---
 if __name__ == "__main__":
     models = [Customer, Seller, Category, SubCategory, Product, Order, Transaction]
     db = DatabaseManager()

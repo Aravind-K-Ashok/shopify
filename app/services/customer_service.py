@@ -6,20 +6,16 @@ from app.database.database import get_connection
 class CustomerService:
     """Handles customer registration, authentication, and profile management using PyMySQL."""
 
-    # 🟢 Register new customer
     def register_customer(self, fname, lname, phoneno, password, address, pincode, district, state, housename):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         try:
-            # Check if phone number already exists
             cursor.execute("SELECT * FROM customers WHERE phoneno = %s", (phoneno,))
             if cursor.fetchone():
                 return {"error": "❌ Phone number already registered"}
 
-            # Hash password
             hashed_password = generate_password_hash(password)
 
-            # Insert new customer
             cursor.execute("""
                 INSERT INTO customers 
                 (fname, lname, phoneno, password_hash, address, pincode, district, state, housename)
@@ -28,7 +24,6 @@ class CustomerService:
 
             conn.commit()
 
-            # ✅ Fetch auto-generated customer ID
             customer_id = cursor.lastrowid
 
             return {
@@ -44,7 +39,6 @@ class CustomerService:
             conn.close()
 
 
-    # 🟡 Authenticate customer
     def authenticate_customer(self, customerID, password):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -58,7 +52,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get customer details
     def get_customer_details(self, customerID):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -72,7 +65,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 🟡 Update phone number
     def update_customer_phone(self, customerID, newphoneno):
         conn = get_connection()
         cursor = conn.cursor()
@@ -91,7 +83,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 🏠 Update address
     def update_customer_address(self, customerID, newaddress, newpincode, newdistrict, newstate, newhousename):
         conn = get_connection()
         cursor = conn.cursor()
@@ -114,7 +105,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 🔐 Change password
     def change_customer_password(self, customerID, oldpassword, newpassword):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -137,7 +127,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 🗑️ Delete customer
     def delete_customer(self, customerID):
         conn = get_connection()
         cursor = conn.cursor()
@@ -157,7 +146,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # 📱 Change password using phone
     def change_phone_password(self, customerID, phoneno, newpassword):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -178,7 +166,6 @@ class CustomerService:
             cursor.close()
             conn.close()
 
-    # ✏️ Change name
     def change_name(self, customerID, newfname, newlname):
         conn = get_connection()
         cursor = conn.cursor()

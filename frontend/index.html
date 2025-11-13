@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shopify — Modern Shopping Redefined</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+  <link href="https://
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
@@ -255,7 +255,6 @@
             const images = getField(p, ['images_url','image_url','images']) || '';
             const img = images ? images.split(',')[0].trim() : '';
 
-            // ensure the Add to Cart item has numeric price
             const cartItem = { productid: id, product_name: name, price: priceVal, images_url: images };
 
             const imgSrc = img || 'https://via.placeholder.com/360x180?text=No+Image';
@@ -272,6 +271,8 @@
           `}).join("");
 
           
+          `}).join("");
+
           const cards = grid.querySelectorAll('.product-card');
           cards.forEach(card => {
             const pid = card.dataset.productid;

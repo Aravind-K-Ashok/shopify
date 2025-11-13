@@ -3,7 +3,6 @@ import pymysql
 
 
 class CategoryService:
-    # 🟢 Add a new category
     def add_category(self, name: str):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -23,7 +22,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🟡 Update a category name
     def update_category(self, category_id: int, new_name: str):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -46,7 +44,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🔴 Delete a category and its subcategories
     def delete_category(self, category_id: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -56,7 +53,6 @@ class CategoryService:
             if not category:
                 return {"error": "❌ Category not found."}
 
-            # Delete subcategories first (foreign key dependency)
             cursor.execute("DELETE FROM subcategories WHERE categoryid = %s", (category_id,))
             cursor.execute("DELETE FROM categories WHERE categoryid = %s", (category_id,))
             conn.commit()
@@ -70,7 +66,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get all categories
     def get_all_categories(self):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -82,7 +77,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🟢 Add subcategory under a category
     def add_subcategory(self, category_id: int, name: str):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -113,7 +107,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🟡 Update subcategory
     def update_subcategory(self, subcategory_id: int, new_name: str):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -136,7 +129,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🔴 Delete subcategory
     def delete_subcategory(self, subcategory_id: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -156,7 +148,6 @@ class CategoryService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get all subcategories of a category
     def get_subcategories_by_category(self, category_id: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)

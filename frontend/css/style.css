@@ -1,7 +1,7 @@
 :root {
-  --accent: #00bfa6;         /* Vibrant teal glow */
-  --sub: #222831;            /* Slightly lighter black */
-  --bg-dark: #0e0e0e;        /* Page background */
+  --accent: #00bfa6;         
+  --sub: #222831;            
+  --bg-dark: #0e0e0e;        
   --text-light: #f1f1f1;
   --text-muted: #a5a5a5;
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
@@ -232,10 +232,10 @@ select {
   border: 1px solid rgba(255,255,255,0.06);
   padding: 0.6rem 0.8rem;
   border-radius: 8px;
-  background-image: none; /* remove default arrow background on some browsers */
+  background-image: none; 
 }
 
-/* Improve appearance on mobile for select */
+
 select:focus {
   outline: none;
   box-shadow: 0 0 8px rgba(0,191,166,0.12);

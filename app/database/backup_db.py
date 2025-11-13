@@ -8,7 +8,6 @@ def backup_database():
     backup_dir = Path(__file__).parent.parent / "database_backup"
     backup_dir.mkdir(exist_ok=True)
     
-    # Backup schema
     schema_file = backup_dir / f"schema_{timestamp}.sql"
     subprocess.run([
         "mysqldump",
@@ -20,7 +19,6 @@ def backup_database():
         "-r", str(schema_file)
     ], check=True)
 
-    # Backup data
     data_file = backup_dir / f"data_{timestamp}.sql"
     subprocess.run([
         "mysqldump",

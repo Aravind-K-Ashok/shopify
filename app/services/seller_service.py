@@ -5,7 +5,6 @@ from app.database.database import get_connection
 class SellerService:
     """Handles seller registration, product management, and order updates using PyMySQL."""
 
-    # ✅ Register seller (linked to existing customer)
     def register_seller(self, customerid: int, rating: float = 0.0):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -31,7 +30,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Add product
     def add_product(self, sellerid: int, description: str, subcategoryid: int, stock: int, rating: float = 0.0):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -57,7 +55,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Update product details
     def update_product(self, sellerid: int, productid: int, description=None, subcategoryid=None, rating=None):
         conn = get_connection()
         cursor = conn.cursor()
@@ -96,7 +93,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Delete product
     def delete_product(self, sellerid: int, productid: int):
         conn = get_connection()
         cursor = conn.cursor()
@@ -115,7 +111,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Get all seller products
     def get_seller_products(self, sellerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -127,7 +122,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Update stock
     def update_stock(self, sellerid: int, productid: int, new_stock: int):
         conn = get_connection()
         cursor = conn.cursor()
@@ -145,7 +139,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Increment/decrement stock
     def change_stock(self, sellerid: int, productid: int, delta: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -170,12 +163,10 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Get all orders for seller
     def get_seller_orders(self, sellerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         try:
-            # Join orders with products, transactions and customers to provide useful aggregates
             cursor.execute("""
                 SELECT o.*, p.price AS product_price, t.amount AS transaction_amount, t.status AS transaction_status, t.transDate AS transaction_date,
                        c.fname, c.lname
@@ -189,11 +180,9 @@ class SellerService:
             if not rows:
                 return {"message": "No orders found."}
 
-            # Normalize/augment rows for frontend convenience
             orders = []
             for r in rows:
                 order = dict(r)
-                # prefer transaction amount when available, otherwise compute from product price and qty
                 if order.get('transaction_amount') is not None:
                     order['total_amount'] = float(order['transaction_amount'])
                 else:
@@ -203,7 +192,6 @@ class SellerService:
 
                 order['items_count'] = int(order.get('qty') or 1)
                 order['customer_name'] = ((order.get('fname') or '') + ' ' + (order.get('lname') or '')).strip() or None
-                # use transaction_date if available, else fallback to current time
                 order['order_date'] = order.get('transaction_date') or order.get('order_date') or order.get('created_at') or None
                 orders.append(order)
 
@@ -212,7 +200,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Update order status
     def update_order_status(self, sellerid: int, orderid: int, new_status: str):
         valid_status = ["Pending", "Dispatched", "On The Way", "Delivered", "Cancelled"]
         if new_status not in valid_status:
@@ -236,7 +223,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Get seller profile
     def get_seller_profile(self, sellerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -248,7 +234,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Get seller by customer id
     def get_seller_by_customer(self, customerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -260,7 +245,6 @@ class SellerService:
             cursor.close()
             conn.close()
 
-    # ✅ Update seller rating
     def update_seller_rating(self, sellerid: int, new_rating: float):
         conn = get_connection()
         cursor = conn.cursor()

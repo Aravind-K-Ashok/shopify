@@ -6,18 +6,15 @@ from app.database.database import get_connection
 class OrderService:
     """Handles order management, status updates, and transactions using PyMySQL."""
 
-    # 🟢 Place new order
     def place_order(self, customerid: int, productid: int, qty: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         try:
-            # Validate customer
             cursor.execute("SELECT * FROM customers WHERE customerid = %s", (customerid,))
             customer = cursor.fetchone()
             if not customer:
                 return {"error": "❌ Customer not found"}
 
-            # Validate product
             cursor.execute("SELECT * FROM products WHERE productid = %s", (productid,))
             product = cursor.fetchone()
             if not product:
@@ -26,23 +23,19 @@ class OrderService:
             if product["stock"] < qty:
                 return {"error": f"❌ Not enough stock for '{product['description']}' (Available: {product['stock']})"}
 
-            # Deduct stock
             new_stock = product["stock"] - qty
             cursor.execute("UPDATE products SET stock = %s WHERE productid = %s", (new_stock, productid))
 
-            # Create order
             cursor.execute("""
                 INSERT INTO orders (customerid, productid, sellerid, qty, status)
                 VALUES (%s, %s, %s, %s, %s)
             """, (customerid, productid, product["sellerid"], qty, "Pending"))
             orderid = cursor.lastrowid
 
-            # Get product price and calculate total amount
             cursor.execute("SELECT price FROM products WHERE productid = %s", (productid,))
             product_price = cursor.fetchone()["price"]
             amount = float(qty * product_price)
 
-            # Create transaction and mark payment as completed immediately
             cursor.execute("""
                 INSERT INTO transactions (orderid, customerid, amount, status, transDate)
                 VALUES (%s, %s, %s, %s, %s)
@@ -57,7 +50,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get order details
     def get_order_details(self, orderid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -69,7 +61,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get all orders by customer
     def get_orders_by_customer(self, customerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -81,7 +72,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 🔍 Get all orders by seller
     def get_orders_by_seller(self, sellerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -93,7 +83,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 🚚 Update order status
     def update_order_status(self, orderid: int, new_status: str):
         valid_statuses = ["Pending", "Dispatched", "On The Way", "Delivered", "Cancelled"]
         if new_status not in valid_statuses:
@@ -111,7 +100,6 @@ class OrderService:
 
             cursor.execute("UPDATE orders SET status = %s WHERE orderid = %s", (new_status, orderid))
 
-            # Auto-update transaction if delivered
             if new_status == "Delivered":
                 cursor.execute("UPDATE transactions SET status = %s WHERE orderid = %s", ("Completed", orderid))
 
@@ -124,7 +112,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 🟥 Cancel order
     def cancel_order(self, orderid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -139,10 +126,8 @@ class OrderService:
 
             cursor.execute("UPDATE orders SET status = 'Cancelled' WHERE orderid = %s", (orderid,))
 
-            # Return stock
             cursor.execute("UPDATE products SET stock = stock + %s WHERE productid = %s", (order["qty"], order["productid"]))
 
-            # Update transaction
             cursor.execute("UPDATE transactions SET status = 'Refunded' WHERE orderid = %s", (orderid,))
 
             conn.commit()
@@ -154,7 +139,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 💳 Create or update transaction
     def create_or_update_transaction(self, orderid: int, amount: float, status: str = "Completed"):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -188,7 +172,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 💵 Get transaction for an order
     def get_transaction_for_order(self, orderid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -200,7 +183,6 @@ class OrderService:
             cursor.close()
             conn.close()
 
-    # 📜 Get all transactions for a customer
     def get_transactions_by_customer(self, customerid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)

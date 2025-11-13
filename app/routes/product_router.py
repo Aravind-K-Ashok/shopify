@@ -6,7 +6,6 @@ from app.database.database import get_db
 from app.services.product_service import ProductService
 from app.services.category_service import CategoryService
 
-# Initialize router
 router = APIRouter(prefix="/products", tags=["Products & Categories"])
 
 @router.get("/categories")
@@ -20,7 +19,6 @@ def list_subcategories(categoryid: int):
     return service.get_subcategories_by_category(categoryid)
 
 
-# ====================== CATEGORY ENDPOINTS ======================
 @router.post("/category/add")
 def add_category(name: str, db: Session = Depends(get_db)):
     try:
@@ -58,7 +56,6 @@ def delete_category(categoryid: int, db: Session = Depends(get_db)):
 
 
 
-# ====================== SUBCATEGORY ENDPOINTS ======================
 @router.post("/subcategory/add")
 def add_subcategory(name: str, categoryid: int, db: Session = Depends(get_db)):
     try:
@@ -101,16 +98,13 @@ def list_subcategories(categoryid: int = None, db: Session = Depends(get_db)):
     return service.list_subcategories(categoryid)
 
 
-# ✅ Nested route used by frontend: /products/categories/{categoryid}/subcategories
 @router.get("/categories/{categoryid}/subcategories")
 def list_subcategories_for_category(categoryid: int):
     service = ProductService()
     return service.list_subcategories(categoryid)
 
 
-# ====================== PRODUCT ENDPOINTS ======================
 
-# ✅ Input model for adding product
 class ProductCreate(BaseModel):
     sellerid: int
     product_name: str

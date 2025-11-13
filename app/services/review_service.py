@@ -45,7 +45,6 @@ class ReviewService:
                 (productid, per_page, offset)
             )
             rows = cursor.fetchall()
-            # normalize fields
             for r in rows:
                 r['name'] = ((r.get('fname') or '') + ' ' + (r.get('lname') or '')).strip() or None
             return {"reviews": rows, "total": total, "avg_rating": avg_rating}
@@ -55,7 +54,6 @@ class ReviewService:
 
     def add_review(self, productid: int, customerid: int, rating: int, comment: str):
         self.ensure_table()
-        # verify purchase exists
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         try:
@@ -64,7 +62,6 @@ class ReviewService:
             if not order:
                 return {"error": "You can only review products you have purchased."}
 
-            # insert review
             cursor.execute("INSERT INTO reviews (productid, customerid, rating, comment, created_at) VALUES (%s, %s, %s, %s, %s)",
                            (productid, customerid, int(rating), comment, datetime.utcnow()))
             conn.commit()

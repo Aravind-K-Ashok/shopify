@@ -5,7 +5,6 @@ from app.database.database import get_connection
 class ProductService:
     """Handles product, category, subcategory, and product management using PyMySQL."""
 
-    # ===================== CATEGORY =====================
     def add_category(self, name: str):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -94,7 +93,6 @@ class ProductService:
 
 
 
-    # ===================== SUBCATEGORY =====================
     def add_subcategory(self, name: str, categoryid: int):
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
@@ -180,7 +178,6 @@ class ProductService:
             cursor.close()
             conn.close()
 
-    # ===================== PRODUCT =====================
     def add_product(
         self,
         sellerid: int,
@@ -195,7 +192,6 @@ class ProductService:
         conn = get_connection()
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         try:
-            # ✅ Support both sellerid and customerid lookup
             cursor.execute(
                 "SELECT * FROM sellers WHERE sellerid = %s OR customerid = %s",
                 (sellerid, sellerid),
@@ -208,14 +204,12 @@ class ProductService:
 
             real_sellerid = seller["sellerid"]
 
-            # ✅ Validate subcategory
             cursor.execute(
                 "SELECT * FROM subcategories WHERE subcategoryid = %s", (subcategoryid,)
             )
             if not cursor.fetchone():
                 return {"error": "❌ Subcategory not found."}
 
-            # ✅ Insert product
             cursor.execute(
                 """
                 INSERT INTO products (product_name, description, sellerid, subcategoryid, price, stock, images_url, rating)

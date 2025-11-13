@@ -6,7 +6,6 @@ from app.services.category_service import CategoryService
 router = APIRouter(prefix="/categories", tags=["Categories"])
 ADMIN_ID = 100002
 
-# ---------- CATEGORY ROUTES ----------
 
 @router.post("/add")
 def add_category(name: str, request: Request):
@@ -45,7 +44,6 @@ def delete_category(category_id: int):
     return result
 
 
-# ---------- SUBCATEGORY ROUTES ----------
 
 @router.post("/{category_id}/subcategories/add")
 def add_subcategory(category_id: int, name: str):

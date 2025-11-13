@@ -4,7 +4,6 @@ from app.services.order_service import OrderService
 router = APIRouter(prefix="/orders", tags=["Orders"])
 
 
-# 🟢 Place a new order
 @router.post("/place")
 def place_order(customerid: int, productid: int, qty: int):
     service = OrderService()
@@ -14,7 +13,6 @@ def place_order(customerid: int, productid: int, qty: int):
     return result
 
 
-# 🔍 View details of a specific order
 @router.get("/{orderid}")
 def get_order_details(orderid: int):
     service = OrderService()
@@ -24,7 +22,6 @@ def get_order_details(orderid: int):
     return result
 
 
-# 🔍 View all orders by a specific customer
 @router.get("/customer/{customerid}")
 def get_orders_by_customer(customerid: int):
     service = OrderService()
@@ -34,7 +31,6 @@ def get_orders_by_customer(customerid: int):
     return result
 
 
-# 🔍 View all orders handled by a specific seller
 @router.get("/seller/{sellerid}")
 def get_orders_by_seller(sellerid: int):
     service = OrderService()
@@ -44,7 +40,6 @@ def get_orders_by_seller(sellerid: int):
     return result
 
 
-# 🚚 Update an order’s status
 @router.put("/{orderid}/status")
 def update_order_status(orderid: int, new_status: str):
     service = OrderService()
@@ -54,7 +49,6 @@ def update_order_status(orderid: int, new_status: str):
     return result
 
 
-# 🟥 Cancel an order (only if not yet dispatched)
 @router.put("/{orderid}/cancel")
 def cancel_order(orderid: int):
     service = OrderService()
@@ -64,7 +58,6 @@ def cancel_order(orderid: int):
     return result
 
 
-# 💵 View transaction linked to an order
 @router.get("/{orderid}/transaction")
 def get_order_transaction(orderid: int):
     service = OrderService()
@@ -74,7 +67,6 @@ def get_order_transaction(orderid: int):
     return result
 
 
-# 💳 Create or update transaction for an order
 @router.post("/{orderid}/transaction")
 def create_transaction(orderid: int, amount: float, status: str = "Completed"):
     service = OrderService()
@@ -84,7 +76,6 @@ def create_transaction(orderid: int, amount: float, status: str = "Completed"):
     return result
 
 
-# 🔍 List all transactions for a customer
 @router.get("/transactions/{customerid}")
 def get_customer_transactions(customerid: int):
     service = OrderService()

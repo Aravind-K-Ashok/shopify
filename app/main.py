@@ -48,7 +48,6 @@ def home():
         ],
     }
 
-
 @app.get("/healthz")
 def health_check():
     """Health check endpoint for Render and load balancers."""

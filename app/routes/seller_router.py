@@ -11,7 +11,6 @@ def register_seller(customerid: int, rating: float = 0.0):
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
-
 @router.put("/{sellerid}/rating")
 def update_rating(sellerid: int, new_rating: float):
     service = SellerService()
@@ -19,7 +18,6 @@ def update_rating(sellerid: int, new_rating: float):
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
     return result
-
 
 @router.get("/{sellerid}")
 def get_seller(sellerid: int):
@@ -29,7 +27,6 @@ def get_seller(sellerid: int):
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-
 @router.get("/customer/{customerid}")
 def get_seller_by_customer(customerid: int):
     service = SellerService()
@@ -37,7 +34,6 @@ def get_seller_by_customer(customerid: int):
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
     return result
-
 
 @router.put("/{sellerid}/product/{productid}/stock")
 def update_product_stock(sellerid: int, productid: int, new_stock: int):
@@ -47,7 +43,6 @@ def update_product_stock(sellerid: int, productid: int, new_stock: int):
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
-
 @router.post("/{sellerid}/product/add")
 def add_product(sellerid: int, description: str, subcategoryid: int, stock: int, rating: float = 0.0):
     service = SellerService()
@@ -55,7 +50,6 @@ def add_product(sellerid: int, description: str, subcategoryid: int, stock: int,
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
-
 
 @router.put("/{sellerid}/product/{productid}")
 def update_product(sellerid: int, productid: int, description: str = None, subcategoryid: int = None, rating: float = None):
@@ -65,7 +59,6 @@ def update_product(sellerid: int, productid: int, description: str = None, subca
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-
 @router.delete("/{sellerid}/product/{productid}")
 def delete_product(sellerid: int, productid: int):
     service = SellerService()
@@ -74,7 +67,6 @@ def delete_product(sellerid: int, productid: int):
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-
 @router.put("/{sellerid}/order/{orderid}/status")
 def update_order_status(sellerid: int, orderid: int, new_status: str):
     service = SellerService()
@@ -82,7 +74,6 @@ def update_order_status(sellerid: int, orderid: int, new_status: str):
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
-
 
 @router.get("/{sellerid}/orders")
 def view_orders(sellerid: int):

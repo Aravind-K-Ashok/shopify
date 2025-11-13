@@ -64,7 +64,7 @@ class Order:
 
 @dataclass
 class Transaction:
-    transid: int | None Primary key, auto-increment
+    transid: int | None
     orderid: int
     customerid: int
     amount: float
@@ -74,7 +74,6 @@ class Transaction:
     def __post_init__(self):
         if self.transid is None:
             self.transid = None
-
 
 class DatabaseManager:
     def __init__(self):
@@ -155,7 +154,6 @@ class DatabaseManager:
 
     def close(self):
         self.conn.close()
-
 
 if __name__ == "__main__":
     models = [Customer, Seller, Category, SubCategory, Product, Order, Transaction]

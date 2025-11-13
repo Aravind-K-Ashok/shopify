@@ -1,7 +1,6 @@
 import pymysql
 from app.database.database import get_connection
 
-
 class ProductService:
     """Handles product, category, subcategory, and product management using PyMySQL."""
 
@@ -90,8 +89,6 @@ class ProductService:
         finally:
             cursor.close()
             conn.close()
-
-
 
     def add_subcategory(self, name: str, categoryid: int):
         conn = get_connection()

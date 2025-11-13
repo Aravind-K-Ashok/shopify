@@ -18,7 +18,6 @@ def list_subcategories(categoryid: int):
     service = CategoryService()
     return service.get_subcategories_by_category(categoryid)
 
-
 @router.post("/category/add")
 def add_category(name: str, db: Session = Depends(get_db)):
     try:
@@ -29,7 +28,6 @@ def add_category(name: str, db: Session = Depends(get_db)):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.put("/category/{categoryid}")
 def update_category(categoryid: int, new_name: str, db: Session = Depends(get_db)):
@@ -42,7 +40,6 @@ def update_category(categoryid: int, new_name: str, db: Session = Depends(get_db
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.delete("/category/{categoryid}")
 def delete_category(categoryid: int, db: Session = Depends(get_db)):
     try:
@@ -53,8 +50,6 @@ def delete_category(categoryid: int, db: Session = Depends(get_db)):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-
 
 @router.post("/subcategory/add")
 def add_subcategory(name: str, categoryid: int, db: Session = Depends(get_db)):
@@ -67,7 +62,6 @@ def add_subcategory(name: str, categoryid: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.put("/subcategory/{subcategoryid}")
 def update_subcategory(subcategoryid: int, new_name: str, db: Session = Depends(get_db)):
     try:
@@ -78,7 +72,6 @@ def update_subcategory(subcategoryid: int, new_name: str, db: Session = Depends(
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.delete("/subcategory/{subcategoryid}")
 def delete_subcategory(subcategoryid: int, db: Session = Depends(get_db)):
@@ -91,19 +84,15 @@ def delete_subcategory(subcategoryid: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.get("/subcategories")
 def list_subcategories(categoryid: int = None, db: Session = Depends(get_db)):
     service = ProductService()
     return service.list_subcategories(categoryid)
 
-
 @router.get("/categories/{categoryid}/subcategories")
 def list_subcategories_for_category(categoryid: int):
     service = ProductService()
     return service.list_subcategories(categoryid)
-
-
 
 class ProductCreate(BaseModel):
     sellerid: int
@@ -114,7 +103,6 @@ class ProductCreate(BaseModel):
     stock: int
     images_url: str
     rating: float = 0.0
-
 
 @router.post("/add")
 def add_product(payload: ProductCreate):
@@ -139,7 +127,6 @@ def add_product(payload: ProductCreate):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.put("/{productid}")
 def update_product(
     productid: int,
@@ -160,7 +147,6 @@ def update_product(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.delete("/{productid}")
 def delete_product(productid: int, db: Session = Depends(get_db)):
     """
@@ -174,7 +160,6 @@ def delete_product(productid: int, db: Session = Depends(get_db)):
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.get("/{productid}")
 def get_product(productid: int, db: Session = Depends(get_db)):
@@ -190,7 +175,6 @@ def get_product(productid: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.get("/{productid}/reviews")
 def get_product_reviews(productid: int, page: int = 1, per_page: int = 10):
     try:
@@ -199,7 +183,6 @@ def get_product_reviews(productid: int, page: int = 1, per_page: int = 10):
         return svc.get_reviews(productid, page, per_page)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
 
 @router.post("/{productid}/review")
 def post_product_review(productid: int, payload: dict = Body(...)):
@@ -224,7 +207,6 @@ def post_product_review(productid: int, payload: dict = Body(...)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @router.get("/")
 def list_products(subcategoryid: int = None, db: Session = Depends(get_db)):
     """
@@ -232,7 +214,6 @@ def list_products(subcategoryid: int = None, db: Session = Depends(get_db)):
     """
     service = ProductService()
     return service.list_products(subcategoryid)
-
 
 @router.get("/search")
 def search_products(keyword: str, db: Session = Depends(get_db)):

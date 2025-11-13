@@ -2,7 +2,6 @@ from app.database.database import SessionLocal
 from app.services.order_service import place_order
 from app.services.seller_service import update_stock
 
-
 db = SessionLocal()
 
 print(update_stock(db, product_id=1, seller_id=1, new_stock=5))

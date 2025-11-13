@@ -1,7 +1,6 @@
 from app.database.database import get_connection
 import pymysql
 
-
 class CategoryService:
     def add_category(self, name: str):
         conn = get_connection()

@@ -1,7 +1,6 @@
 import pymysql
 from app.database.database import get_connection
 
-
 class SellerService:
     """Handles seller registration, product management, and order updates using PyMySQL."""
 

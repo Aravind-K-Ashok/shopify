@@ -2,7 +2,6 @@ import pymysql
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.database.database import get_connection
 
-
 class CustomerService:
     """Handles customer registration, authentication, and profile management using PyMySQL."""
 
@@ -37,7 +36,6 @@ class CustomerService:
         finally:
             cursor.close()
             conn.close()
-
 
     def authenticate_customer(self, customerID, password):
         conn = get_connection()

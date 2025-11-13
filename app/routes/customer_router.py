@@ -3,7 +3,6 @@ from app.services.customer_service import CustomerService
 
 router = APIRouter(prefix="/customers", tags=["Customers"])
 
-
 @router.post("/register")
 def register_customer(
     fname: str,
@@ -22,7 +21,6 @@ def register_customer(
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
-
 @router.post("/login")
 def login_customer(customerID: int, password: str):
     service = CustomerService()
@@ -30,7 +28,6 @@ def login_customer(customerID: int, password: str):
     if "error" in result:
         raise HTTPException(status_code=401, detail=result["error"])
     return result
-
 
 @router.get("/{customerID}")
 def get_customer(customerID: int):
@@ -40,7 +37,6 @@ def get_customer(customerID: int):
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-
 @router.put("/{customerID}/phone")
 def update_phone(customerID: int, newphoneno: str):
     service = CustomerService()
@@ -48,7 +44,6 @@ def update_phone(customerID: int, newphoneno: str):
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
     return result
-
 
 @router.put("/{customerID}/address")
 def update_address(
@@ -65,7 +60,6 @@ def update_address(
         raise HTTPException(status_code=404, detail=result["error"])
     return result
 
-
 @router.put("/{customerID}/password")
 def change_password(customerID: int, oldpassword: str, newpassword: str):
     service = CustomerService()
@@ -73,7 +67,6 @@ def change_password(customerID: int, oldpassword: str, newpassword: str):
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
     return result
-
 
 @router.put("/{customerID}/reset-password")
 def reset_password(customerID: int, phoneno: str, newpassword: str):
@@ -83,7 +76,6 @@ def reset_password(customerID: int, phoneno: str, newpassword: str):
         raise HTTPException(status_code=400, detail=result["error"])
     return result
 
-
 @router.put("/{customerID}/name")
 def change_name(customerID: int, newfname: str, newlname: str):
     service = CustomerService()
@@ -91,7 +83,6 @@ def change_name(customerID: int, newfname: str, newlname: str):
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
     return result
-
 
 @router.delete("/{customerID}")
 def delete_customer(customerID: int):

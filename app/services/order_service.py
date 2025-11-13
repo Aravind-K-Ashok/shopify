@@ -2,7 +2,6 @@ import pymysql
 from datetime import datetime
 from app.database.database import get_connection
 
-
 class OrderService:
     """Handles order management, status updates, and transactions using PyMySQL."""
 

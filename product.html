@@ -132,7 +132,7 @@
             const productid = p.productid ?? p.id;
             const qty = 1;
             try {
-              const url = `https://shopify-backend-m9ce.onrender.com/place?customerid=${customerid}&productid=${productid}&qty=${qty}`;
+              const url = `https://shopify-backend-m9ce.onrender.com/orders/place?customerid=${customerid}&productid=${productid}&qty=${qty}`;
               const res = await fetch(url, { method: 'POST' });
               const data = await res.json();
               if (!res.ok || data.error) {

@@ -337,7 +337,7 @@
             }
 
             
-            const orderUrl = `${API}/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(item.productid)}&qty=${encodeURIComponent(item.qty)}`;
+            const orderUrl = `${API}/orders/place?customerid=${encodeURIComponent(customerid)}&productid=${encodeURIComponent(item.productid)}&qty=${encodeURIComponent(item.qty)}`;
             const orderRes = await fetch(orderUrl, { method: 'POST' });
             const orderData = await orderRes.json();
             

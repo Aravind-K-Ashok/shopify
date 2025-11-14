@@ -124,27 +124,17 @@
           `;
 
           document.getElementById('add').addEventListener('click', ()=>{
-            addToCart({ productid: p.productid ?? p.id, product_name: name, price: priceVal, images_url: p.images_url ?? p.images });
+            addToCart({ productid: p.productid ?? p.id, product_name: name, price: priceVal, images_url: p.images_url ?? p.images, qty: 1 });
           });
-          document.getElementById('buy').addEventListener('click', async ()=>{
+          document.getElementById('buy').addEventListener('click', ()=>{
             const customerid = localStorage.getItem('customerID');
-            if (!customerid) { alert('Please log in to Buy Now'); return; }
-            const productid = p.productid ?? p.id;
-            const qty = 1;
-            try {
-              const url = `https://shopify-backend-m9ce.onrender.com/orders/place?customerid=${customerid}&productid=${productid}&qty=${qty}`;
-              const res = await fetch(url, { method: 'POST' });
-              const data = await res.json();
-              if (!res.ok || data.error) {
-                alert('Purchase failed: ' + (data.detail || data.error || JSON.stringify(data)));
-              } else {
-                alert(data.message || 'Purchase successful');
-                
-                location.href = './transactions.html';
-              }
-            } catch (e) {
-              alert('Purchase error: ' + e.message);
+            if (!customerid) { 
+              alert('Please log in to Buy Now'); 
+              location.href = './login.html';
+              return; 
             }
+            addToCart({ productid: p.productid ?? p.id, product_name: name, price: priceVal, images_url: p.images_url ?? p.images, qty: 1 });
+            location.href = './payment.html';
           });
 
           

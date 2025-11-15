@@ -1,126 +1,156 @@
-# E-Commerce Backend
+# Shopify E-Commerce (FastAPI + MySQL + Static Frontend)
 
-A FastAPI-based e-commerce backend with a frontend interface.
+FastAPI backend with a static HTML/CSS/JS frontend (GitHub Pages). Supports customers, products, categories, cart, orders, reviews, seller panel, transactions.
+
+## Live
+- Frontend: https://aravind-k-ashok.github.io/shopify/
+- API Base: https://shopify-backend-m9ce.onrender.com
 
 ## Features
-
-- Customer management (registration, authentication)
-- Product catalog with categories
-- Shopping cart functionality
-- Order processing
-- Seller dashboard
-- Review system
+- Customer registration / login (token + customerID in localStorage)
+- Product + category + subcategory hierarchy
+- Image upload (Supabase Storage; move anon key to server for production)
+- Cart logic (add/remove/quantity) persisted client-side
+- Checkout flow: index → product → cart → payment → transactions
+- Order placement (`/orders/place`) and status updates
+- Seller dashboard (orders, revenue summary)
+- Reviews & average rating display
 
 ## Tech Stack
+Backend: FastAPI, Uvicorn  
+DB: MySQL (local or managed)  
+Frontend: Plain HTML/CSS/JavaScript (no build step)  
+Storage: Supabase (optional)  
 
-- Backend: Python/FastAPI
-- Database: MySQL
-- Frontend: HTML/CSS/JavaScript
-- Authentication: Custom token-based
-
-## Setup
-
-1. Create and activate a virtual environment:
-```bash
-python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Unix/macOS
-source .venv/bin/activate
-```
-
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Set up MySQL database:
-   - Create a database named 'ecomdb'
-   - Update database credentials in `app/database/database.py` if needed
-
-4. Run the application:
-```bash
-uvicorn app.main:app --reload
-```
-
-5. Access the application:
-   - API Documentation: http://localhost:8000/docs
-   - Frontend: Open `frontend/index.html` in a browser
-
-## Project Structure
-
+## Structure
 ```
 ecom_backend/
 ├── app/
-│   ├── database/       # Database configuration
-│   ├── models/         # Data models
-│   ├── routes/         # API endpoints
-│   ├── services/       # Business logic
-│   └── main.py        # Application entry point
+│   ├── main.py
+│   ├── database/ (connection, session)
+│   ├── models/   (SQLAlchemy models)
+│   ├── routes/   (product, order, customer, category, review)
+│   ├── services/ (business helpers)
+│   └── database_backup/ (SQL dump)
 ├── frontend/
-│   ├── css/           # Stylesheets
-│   ├── js/            # JavaScript files
-│   └── *.html         # Frontend pages
-└── requirements.txt    # Python dependencies
+│   ├── *.html
+│   ├── css/
+│   └── js/
+└── requirements.txt
 ```
 
-## API Documentation
-
-The API documentation is automatically generated and can be accessed at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
-## Configuration
-
-Database configuration is now read from environment variables. You can provide either a single `DATABASE_URL` (recommended) or the individual `DB_*` variables.
-
-Preferred: set `DATABASE_URL` (example, do NOT commit secrets):
-
-```text
-# Example (remove credentials and fill in your password before use):
-# DATABASE_URL=mysql://avnadmin:REPLACE_WITH_PASSWORD@mysql-29c6b70f-aravindkashok10-db91.i.aivencloud.com:18523/defaultdb?ssl-mode=REQUIRED
-DATABASE_URL=
+## Setup (Local)
+```bash
+git clone https://github.com/Aravind-K-Ashok/shopify.git
+cd ecom_backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+# source .venv/bin/activate     # macOS/Linux
+pip install -r requirements.txt
 ```
 
-Or set individual variables (used when `DATABASE_URL` is not present):
+Create MySQL database:
+```sql
+CREATE DATABASE ecomdb CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
 
-```text
+## Environment Variables
+Use a single URL (preferred) or individual parts.
+
+```
+# .env
+DATABASE_URL=mysql://USER:PASSWORD@HOST:PORT/ecomdb
+# Or:
 DB_HOST=localhost
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=yourpassword
+DB_PASSWORD=pass
 DB_NAME=ecomdb
+# Optional TLS:
+DB_SSL_CA=
 ```
 
-Optional: If your provider requires TLS verification, upload the provider's CA bundle to the host/container and set:
+Copy `.env.example` then fill values. Do NOT commit `.env`.
 
-```text
-DB_SSL_CA=/path/to/ca-bundle.pem
+## Run Backend
+```bash
+uvicorn app.main:app --reload
+```
+Docs:  
+- Swagger: http://localhost:8000/docs  
+- ReDoc: http://localhost:8000/redoc  
+
+## Frontend (Local)
+Open `frontend/index.html` directly or serve:
+```bash
+python -m http.server 8001 -d frontend
 ```
 
-A `.env.example` file has been added to the repository to show the variables and expected format. For local development copy it to `.env` and fill values (do NOT commit `.env`).
+## Core Flow
+1. Browse products (index/product pages)
+2. Add to cart (localStorage)
+3. Proceed to payment (payment.html)
+4. Place order (calls `/orders/place`)
+5. View transactions (transactions.html)
+6. Seller can view aggregated orders (orders_seller.html)
 
-## Importing the provided SQL backup
+## Key Endpoints (Examples)
+```bash
+# Products
+GET  /products
+GET  /products/{productid}
+POST /products/add
 
-To import the SQL backup located at `app/database_backup/data_*.sql` into a remote MySQL (Aiven) instance from your local machine, run:
+# Categories
+GET  /products/categories
+GET  /products/categories/{categoryid}/subcategories
 
+# Orders
+POST /orders/place?customerid=100001&productid=2&qty=1
+GET  /orders/{orderid}
+PATCH /orders/{orderid}/status?new_status=Delivered
+
+# Transactions
+GET  /orders/{orderid}/transaction
+POST /orders/{orderid}/transaction?amount=999&status=Completed
+```
+
+## Import SQL Backup
 ```powershell
 mysql -h <HOST> -P <PORT> -u <USER> -p --ssl-mode=REQUIRED <DB_NAME> < .\app\database_backup\data_20251107_212518.sql
 ```
 
-Example (replace with your actual values):
+## Supabase (Images)
+Replace placeholder anon key. Move key server-side for production (never expose real service keys in public HTML).
 
-```powershell
-mysql -h mysql-29c6b70f-aravindkashok10-db91.i.aivencloud.com -P 18523 -u avnadmin -p --ssl-mode=REQUIRED defaultdb < .\app\database_backup\data_20251107_212518.sql
-```
+## Security Checklist
+- Remove secrets from frontend (Supabase key)
+- Hash passwords (bcrypt) if not already
+- Restrict CORS origins
+- Add rate limiting (e.g. slowapi)
+- Validate all inputs (Pydantic schemas)
+- Sanitize review text
+- Use HTTPS everywhere
+- Consider JWT or secure cookies (current token is simple)
 
-The command will prompt for the password. Make sure the `mysql` client is installed locally. If you prefer, you can import via the provider's console/GUI.
+## Troubleshooting
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| Pylance missing import | VS Code path | Add `"python.analysis.extraPaths": ["${workspaceFolder}"]` |
+| 404 `/place` | Missing `/orders` prefix | Use `/orders/place` |
+| Broken fonts | Incomplete link | Ensure full Google Fonts href |
+| Storage upload fails | Bucket/key mismatch | Verify bucket, move key to env |
 
-## Security Notes
+## Future Improvements
+- Server-side cart persistence
+- Pagination & filtering
+- Admin analytics endpoints
+- JWT auth refactor
+- Automated tests (pytest + CI)
 
-Before deploying to production:
-1. Move database credentials to environment variables (done)
-2. Enable CORS only for trusted domains
-3. Add rate limiting
-4. Enable HTTPS
-5. Add proper authentication mechanisms
+## License
+Add a LICENSE file (MIT recommended).
+
+## Disclaimer
+Demo configuration only. Harden before production deployment.
+// ...existing code...

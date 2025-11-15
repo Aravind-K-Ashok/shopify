@@ -177,15 +177,15 @@
       
       <div class="payment-methods">
         <div class="payment-method active" data-method="card">
-          <img src="https://via.placeholder.com/30x30?text=Card" alt="Card">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23fff'/><text x='15' y='20' text-anchor='middle' font-size='10' fill='%23000'>CARD</text></svg>" alt="Card">
           <div>Credit/Debit Card</div>
         </div>
         <div class="payment-method" data-method="upi">
-          <img src="https://via.placeholder.com/30x30?text=UPI" alt="UPI">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23fff'/><text x='15' y='20' text-anchor='middle' font-size='10' fill='%23000'>UPI</text></svg>" alt="UPI">
           <div>UPI</div>
         </div>
         <div class="payment-method" data-method="cod">
-          <img src="https://via.placeholder.com/30x30?text=COD" alt="COD">
+          <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30'><rect width='30' height='30' fill='%23fff'/><text x='15' y='20' text-anchor='middle' font-size='10' fill='%23000'>COD</text></svg>" alt="COD">
           <div>Cash on Delivery</div>
         </div>
       </div>
@@ -363,10 +363,10 @@
 
             
             
-            const transCheckRes = await fetch(`${API}/${orderid}/transaction`);
+            const transCheckRes = await fetch(`${API}/orders/${orderid}/transaction`);
             if (!transCheckRes.ok) {
               
-              const transUrl = `${API}/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent('Completed')}`;
+              const transUrl = `${API}/orders/${orderid}/transaction?amount=${amount}&status=${encodeURIComponent('Completed')}`;
               const transRes = await fetch(transUrl, { method: 'POST' });
               const transData = await transRes.json();
               
